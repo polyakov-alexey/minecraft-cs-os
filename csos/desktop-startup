@@ -1,4 +1,4 @@
-local OSVersion = "CS-OS v.0.2"
+local OSVersion = "CS-OS v.1.0"
 
 local function DisplayMessage(message)
   local termW, termH = term.getSize()

@@ -1,0 +1,51 @@
+local applications = {
+  "/csos/lib/class-frame",
+  "/csos/lib/class-progressbar",
+  "/csos/lib/req-advterm",
+  "/csos/lib/req-network",
+  "/csos/desktop-startup",
+  "/csos/router-startup",
+  "/startup"
+}
+
+if fs.exists("/csos") then
+  print("There is another version of CS-OS. Remove it?")
+  print("Y / N")
+  write("> ")
+  answer = read()
+  if answer ~= "Y" then return end
+  print("--- Deleting old version")
+  print()
+  fs.delete("/csos/")
+  if fs.exists("/startup") then
+    fs.delete("/startup.backup")
+    fs.move("/startup", "/startup.backup")
+  end
+end
+
+local allowDisk = true
+print("Do you want to allow disk startup?")
+print("Y - Yes, allow disk startup. Somebody theoretically can hack your computer")
+print("N - No, forbid disk startup. You will not be able to easily unbrick your computer in case of breakdown")
+write("> ")
+answer = read()
+if answer == "N" then allowDisk = false end
+
+for _,side in ipairs(applications) do
+  print("--- Installing " .. applications[i][2])
+  print()
+  fs.makeDir(fs.getDir(applications[i][2]) or "")
+  shell.run("wget https://raw.githubusercontent.com/polyakov-alexey/minecraft-cs-os/main" .. applications[i][1] .. " " .. applications[i][2])
+  os.sleep(0.1)
+end
+
+print("--- Applying settings")
+print()
+if allowDisk then
+  shell.run("set shell.allow_disk_startup true")
+else
+  shell.run("set shell.allow_disk_startup false")
+end
+
+print("--- Rebooting")
+os.reboot()
