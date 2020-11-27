@@ -3,6 +3,8 @@ local applications = {
   "/csos/lib/class-progressbar",
   "/csos/lib/req-advterm",
   "/csos/lib/req-network",
+  "/csos/req-startup",
+  "/csos/req-router",
   "/csos/desktop-startup",
   "/csos/router-startup",
   "/startup"
