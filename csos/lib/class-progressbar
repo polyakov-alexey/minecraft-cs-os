@@ -1,0 +1,51 @@
+this = {}
+this.__index = this
+
+function this.new(x, y, length, maxValue, progressColor, bgColor)
+  local self = {}
+  setmetatable(self, this)
+  self.x = x
+  self.y = y
+  self.length = math.floor(length)
+  self.value = 0
+  self.maxValue = maxValue
+  self.progressColor = progressColor or colors.green
+  self.bgColor = bgColor or colors.gray
+  return self
+end
+
+function this:Debug()
+  print("[#] ")
+end
+
+function this:Draw()
+  termTextColor = term.getTextColor()
+  termBackgroundColor = term.getBackgroundColor()
+
+  term.setCursorPos(self.x, self.y)
+  term.setBackgroundColor(self.progressColor)
+  local progressLength = self.length * (self.value / self.maxValue)
+  local progressString = ""
+  while (progressString:len() < progressLength) do progressString = progressString .. " " end
+  term.write(progressString)
+  term.setBackgroundColor(self.bgColor)
+  local bgString = ""
+  while (bgString:len() < (self.length - #progressString)) do bgString = bgString .. " " end
+  term.write(bgString)
+
+  term.setTextColor(termTextColor)
+  term.setBackgroundColor(termBackgroundColor)
+end
+
+function this:SetValue(value)
+  self.value = value
+  if self.value < 0 then self.value = 0 end
+  if self.value > self.maxValue then self.value = self.maxValue end
+  self:Draw()
+end
+
+function this:IncValue()
+  self:SetValue(self.value + 1)
+end
+
+return this

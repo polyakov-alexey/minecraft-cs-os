@@ -1,0 +1,36 @@
+local this = {}
+
+local oldTerm = nil
+local isUsingMonitor = false
+---------------------------------------------------
+function this.DoNothing()
+end
+---------------------------------------------------
+function this.Reset()
+  term.clear()
+  term.setCursorPos(1,1)
+end
+---------------------------------------------------
+function this.Enable()
+  local monitor = peripheral.find("monitor")
+  if monitor then
+    oldTerm = term.redirect(monitor)
+    term.setTextScale = monitor.setTextScale
+    isUsingMonitor = true
+  else
+    term.setTextScale = this.DoNothing
+    isUsingMonitor = false
+  end
+  term.reset = this.Reset
+end
+---------------------------------------------------
+function this.Disable()
+  if oldTerm then term.redirect(oldTerm) end
+  isUsingMonitor = false
+end
+---------------------------------------------------
+function this.isMonitor()
+  return isUsingMonitor
+end
+---------------------------------------------------
+return this

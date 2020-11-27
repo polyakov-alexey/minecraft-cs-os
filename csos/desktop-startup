@@ -1,0 +1,62 @@
+local OSVersion = "CS-OS v.0.2"
+
+local function DisplayMessage(message)
+  local termW, termH = term.getSize()
+  term.setCursorPos(1, termH)
+  term.clearLine()
+  term.write("> " .. message)
+end
+
+term.clear()
+term.setCursorPos(1,1)
+
+advterm = require("/csos/lib/req-advterm")
+advterm.Enable()
+term.reset()
+print("> AdvancedTerminal module enabled")
+sleep(0.1)
+
+write("> Loading library class-progressbar ...")
+sleep(0.1)
+local pbarClass = require("/csos/lib/class-progressbar")
+print(" DONE")
+sleep(0.1)
+
+write("> Calculating terminal parameters ...")
+sleep(0.1)
+local termW, termH = term.getSize()
+local termTextColor = term.getTextColor()
+print(" DONE")
+sleep(0.1)
+
+term.reset()
+term.setCursorPos((termW - #OSVersion) / 2 + 1, termH / 2)
+term.setTextColor(colors.green)
+term.write(OSVersion)
+term.setTextColor(termTextColor)
+
+DisplayMessage("Initiating progress bar ...")
+sleep(0.1)
+local pbar = pbarClass.new(4, termH / 2 + 2, termW - 6, 1)
+pbar:Draw()
+DisplayMessage("Initiating progress bar ... DONE")
+sleep(0.1)
+
+---------------------------------------------------
+-- CUSTOM SECTION START
+---------------------------------------------------
+
+---------------------------------------------------
+-- CUSTOM SECTION END
+---------------------------------------------------
+
+DisplayMessage("OS is ready")
+pbar:IncValue()
+pbar:Draw()
+sleep(1)
+
+term.reset()
+advterm.Disable()
+term.setTextColor(colors.green)
+print(OSVersion .. " #" .. os.getComputerID())
+term.setTextColor(termTextColor)

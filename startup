@@ -1,0 +1,3 @@
+shell.run("csos/router-startup")
+
+-- set shell.allow_disk_startup false

@@ -1,0 +1,189 @@
+local this = {}
+
+local IDTable = {}
+local ID = os.getComputerID()
+
+local timerPing = 0
+local timerPingMinTime = 3 --30
+local timerPingMaxTime = 3 --60
+local timerIDTable = 0
+local timerIDTableMinTime = 5 --60
+local timerIDTableMaxTime = 10 --120
+
+---------------------------------------------------
+function this.DisplayDebug(message)
+  termTextColor = term.getTextColor()
+  term.setTextColor(colors.lightGray)
+  print(message)
+  term.setTextColor(termTextColor)
+end
+---------------------------------------------------
+function this.DisplayMessage(message)
+  print(message)
+end
+---------------------------------------------------
+function this.DisplayError(message)
+  termTextColor = term.getTextColor()
+  term.setTextColor(colors.red)
+  print(message)
+  term.setTextColor(termTextColor)
+end
+---------------------------------------------------
+function this.PrintIDTable()
+    this.DisplayMessage("--- CURRENT IDT:")
+    termTextColor = term.getTextColor()
+    term.setTextColor(colors.lightGray)
+    for target, id in pairs(IDTable) do
+        print(string.format("    | %-3u | %-3u |", target, id))
+    end
+    term.setTextColor(termTextColor)
+end
+---------------------------------------------------
+function this.Ping(ID)
+  local msg = {}
+  msg["protocol"] = "CSNET"
+  msg["cmd"]      = "PING"
+  this.DisplayDebug("--> PING #", id)
+  rednet.send(id, msg)
+end
+---------------------------------------------------
+function this.ProcessPing(inputID)
+  this.DisplayDebug("<-- 4 PING")
+  IDTable[inputID] = inputID
+end
+---------------------------------------------------
+function this.PingBroadcast()
+    local msg = {}
+    msg["protocol"] = "CSNET"
+    msg["cmd"]      = "PING"
+    this.DisplayDebug("))) PING (Own ID #" .. ID .. ")")
+    rednet.broadcast(msg)
+end
+---------------------------------------------------
+function this.IDTableBroadcast()
+    msg = {}
+    msg["protocol"] = "CSNET"
+    msg["cmd"]      = "IDT"
+    msg["data"]     = IDTable
+    this.DisplayDebug("))) IDT")
+    rednet.broadcast(msg)
+end
+---------------------------------------------------
+function this.ProcessIDTable(inputID, inputIDTable)
+  this.DisplayDebug("<-- 4 IDT")
+  IDTable[inputID] = inputID
+  for target, id in pairs(inputIDTable) do
+      if IDTable[target] ~= ID and target ~= ID then
+          IDTable[target] = inputID
+      end
+  end
+end
+---------------------------------------------------
+function this.ProcessMsg(id, msg)
+  termTextColor = term.getTextColor()
+
+  if ((type(msg) ~= "table") or (msg["protocol"] ~= "CSNET")) then
+    term.setTextColor(colors.gray)
+    print("<-",id,":",msg)
+    term.setTextColor(termTextColor)
+    return nil
+  end
+
+  --[[
+  term.setTextColor(colors.lightGray)
+  write("<-- " .. id .. " : ")
+  x_ = term.getCursorPos()
+  for i,v in pairs(msg) do
+      x, y = term.getCursorPos()
+      term.setCursorPos(x_, y)
+      write("["..i.."]")
+      term.setCursorPos(x_ + 13, y)
+      write("- [")
+      if type(v) == "table" then
+          write("<TABLE>")
+      else
+          write(v)
+      end
+      print("]")
+  end
+  ]]--
+
+  if msg["cmd"] == "PING" then
+      this.ProcessPing(id)
+  end
+
+  if msg["cmd"] == "IDT" then
+      this.ProcessIDTable(id, msg["data"])
+  end
+
+end
+---------------------------------------------------
+function this.ProcessTimer(id)
+    if id == timerPing then
+        this.PingBroadcast()
+        timerPing = os.startTimer(math.random(timerPingMinTime, timerPingMaxTime))
+    end
+    if id == timerIDTable then
+        this.IDTableBroadcast()
+        timerIDTable = os.startTimer(math.random(timerIDTableMinTime, timerIDTableMaxTime))
+    end
+end
+---------------------------------------------------
+function this.Start()
+    this.DisplayMessage("--- Own ID: #" .. ID)
+
+    if not rednet.isOpen() then
+        termTextColor = term.getTextColor()
+        term.setTextColor(colors.red)
+        this.DisplayError("### Rednet connection is not opened")
+        term.setTextColor(termTextColor)
+        return nil
+    else
+      this.DisplayMessage("--- RedNet connection is opened")
+    end
+
+    this.DisplayMessage("--- Initiating PingBroadcast()")
+
+    this.DisplayMessage("--- Initiating PingBroadcast()")
+    this.PingBroadcast()
+
+    this.DisplayMessage("--- Starting timerPing")
+    timerPing = os.startTimer(math.random(timerPingMinTime, timerPingMaxTime))
+    -- print(" #" .. timerPing)
+
+    this.DisplayMessage("--- Starting timerIDTable")
+    timerIDTable = os.startTimer(math.random(timerIDTableMinTime, timerIDTableMaxTime))
+    -- print(" #" .. timerIDTable)
+
+    this.DisplayMessage("--- Starting router loop")
+    while (true) do
+        event, id, msg = os.pullEvent()
+
+        if event == "rednet_message" then
+            result = this.ProcessMsg(id, msg)
+            if result ~= nil then
+                print("*******************")
+                print(result["data"])
+                print("********************")
+            end
+        end
+
+        if event == "timer" then
+            this.ProcessTimer(id)
+        end
+
+        if event == "char" then
+            if id == "p" then
+                this.PingBroadcast()
+            end
+            if id == "i" then
+                this.IDTableBroadcast()
+            end
+            if id == "t" then
+                this.PrintIDTable()
+            end
+        end
+    end
+end
+---------------------------------------------------
+return this

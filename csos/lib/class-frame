@@ -1,0 +1,70 @@
+this = {}
+this.__index = this
+
+function this.new(x, y, w, h, label, frameColor, textColor)
+  local self = {}
+  setmetatable(self, this)
+  self.x = x
+  self.y = y
+  self.w = w
+  self.h = h
+  self.label = label
+  self.frameColor = frameColor
+  self.textColor = textColor
+  return self
+end
+
+function this:Debug()
+  print("[#] (" .. self.x .. ", " .. self.y .. ") " .. self.w .. "x" .. self.h .. ", \"" .. self.label .. "\"" .. ", " .. self.frameColor .. ", " .. self.textColor)
+  print("[#] " .. #self.label)
+end
+
+function this:Draw()
+  termTextColor = term.getTextColor()
+  termBackgroundColor = term.getBackgroundColor()
+
+  term.setTextColor(self.textColor)
+
+  -------------------------------------------------
+  -- First string
+  -------------------------------------------------
+  term.setCursorPos(self.x, self.y)
+  term.setBackgroundColor(self.frameColor)
+  term.write("  ")
+  term.setBackgroundColor(termBackgroundColor)
+  term.write(" ")
+  local maxLabelLength = self.w - 6;
+  local labelString = self.label
+  if (maxLabelLength < #self.label) then
+    labelString = self.label:sub(1, maxLabelLength)
+  end
+  term.write(labelString)
+  term.write(" ")
+  term.setBackgroundColor(self.frameColor)
+  local s = ""
+  while (s:len() < (self.w - 4 - #labelString)) do s = s .. " " end
+  term.write(s)
+
+  -------------------------------------------------
+  -- Intermediate strings
+  -------------------------------------------------
+  for i = 1, self.h - 2 do
+    term.setCursorPos(self.x, self.y + i)
+    term.write(" ")
+    term.setCursorPos(self.x + self.w - 1, self.y + i)
+    term.write(" ")
+  end
+
+  -------------------------------------------------
+  -- Last strings
+  -------------------------------------------------
+  local s = ""
+  while (s:len() < self.w) do s = s .. " " end
+  term.setCursorPos(self.x, self.y + self.h - 1)
+  term.write(s)
+
+  term.setTextColor(termTextColor)
+  term.setBackgroundColor(termBackgroundColor)
+end
+
+return this
