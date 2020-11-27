@@ -1,1 +1,2 @@
 shell.run("csos/desktop-startup")
+--shell.run("csos/router-startup")

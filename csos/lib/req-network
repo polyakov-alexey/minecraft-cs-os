@@ -43,7 +43,7 @@ function this.Ping(ID)
   local msg = {}
   msg["protocol"] = "CSNET"
   msg["cmd"]      = "PING"
-  this.DisplayDebug("--> PING #", id)
+  this.DisplayDebug("--> [" .. id .. "] PING")
   rednet.send(id, msg)
 end
 ---------------------------------------------------
@@ -56,7 +56,7 @@ function this.PingBroadcast()
     local msg = {}
     msg["protocol"] = "CSNET"
     msg["cmd"]      = "PING"
-    this.DisplayDebug("))) PING (Own ID #" .. ID .. ")")
+    this.DisplayDebug("))) PING (#" .. ID .. ")")
     rednet.broadcast(msg)
 end
 ---------------------------------------------------
@@ -65,7 +65,7 @@ function this.IDTableBroadcast()
     msg["protocol"] = "CSNET"
     msg["cmd"]      = "IDT"
     msg["data"]     = IDTable
-    this.DisplayDebug("))) IDT")
+    this.DisplayDebug("))) IDT (#" .. ID .. ")")
     rednet.broadcast(msg)
 end
 ---------------------------------------------------

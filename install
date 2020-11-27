@@ -8,44 +8,117 @@ local applications = {
   "/startup"
 }
 
+local doneStepsCount = 0
+local totalStepsCount = #applications + 4
+local function DrawProgressBar()
+  local cursorX, cursorY = term.getCursorPos()
+  term.setCursorPos(1,3)
+  term.clearLine()
+  local string = "["
+  while string:len() < (doneStepsCount + 1) do string = string .. "|" end
+  while string:len() < (totalStepsCount + 1) do string = string .. "." end
+  string = string .. "]"
+  print(string)
+  term.setCursorPos(cursorX, cursorY)
+end
+local function TickProgressBar()
+  doneStepsCount = doneStepsCount + 1
+  DrawProgressBar()
+end
+local function RedrawWindow()
+  term.clear()
+  term.setCursorPos(1,1)
+  termTextColor = term.getTextColor()
+  term.setTextColor(colors.green)
+  write("CS-OS Installation")
+  term.setTextColor(termTextColor)
+  DrawProgressBar()
+  term.setCursorPos(1,5)
+end
+
+RedrawWindow()
+local deleteOld = false
 if fs.exists("/csos") then
-  print("There is another version of CS-OS. Remove it?")
-  print("Y / N")
+  print("There is another version of CS-OS on your computer.")
+  print()
+  print("Owerwrite it? ( Y / N )")
+  print()
   write("> ")
   answer = read()
-  if answer ~= "Y" then return end
-  print("--- Deleting old version")
-  print()
+  if answer ~= "Y" then print() print("- Installation stopped") return end
+  deleteOld = true
+end
+TickProgressBar()
+
+RedrawWindow()
+local allowDisk = true
+print("Do you want to allow disk startup?")
+print()
+print("Y - Yes, allow disk startup. Somebody theoretically can hack your computer")
+print()
+print("N - No, forbid disk startup. You will not be able to easily unbrick your computer in case of breakdown")
+print()
+write("> ")
+answer = read()
+if answer == "N" then allowDisk = false end
+TickProgressBar()
+
+RedrawWindow()
+
+if deleteOld then
+  print("- Deleting old version")
   fs.delete("/csos/")
   if fs.exists("/startup") then
     fs.delete("/startup.backup")
     fs.move("/startup", "/startup.backup")
   end
+  sleep(0.05)
+end
+TickProgressBar()
+
+local lastRedirectOutput = nil
+local function RedirectOutput(string)
+  lastRedirectOutput = string or "NOSTRING"
 end
 
-local allowDisk = true
-print("Do you want to allow disk startup?")
-print("Y - Yes, allow disk startup. Somebody theoretically can hack your computer")
-print("N - No, forbid disk startup. You will not be able to easily unbrick your computer in case of breakdown")
-write("> ")
-answer = read()
-if answer == "N" then allowDisk = false end
+for _,app in ipairs(applications) do
+  print("- Installing " .. app)
+  fs.makeDir(fs.getDir(app) or "")
 
-for _,side in ipairs(applications) do
-  print("--- Installing " .. applications[i][2])
-  print()
-  fs.makeDir(fs.getDir(applications[i][2]) or "")
-  shell.run("wget https://raw.githubusercontent.com/polyakov-alexey/minecraft-cs-os/main" .. applications[i][1] .. " " .. applications[i][2])
-  os.sleep(0.1)
+  local oldWrite = term.write
+  term.write = RedirectOutput
+  local cursorX, cursorY = term.getCursorPos()
+  shell.run("wget https://raw.githubusercontent.com/polyakov-alexey/minecraft-cs-os/main" .. app .. " " .. app)
+  term.write = oldWrite
+  term.setCursorPos(cursorX, cursorY)
+
+  if lastRedirectOutput == "Failed." then
+    termTextColor = term.getTextColor()
+    term.setTextColor(colors.red)
+    print("# ERROR during download " .. app)
+    term.setTextColor(termTextColor)
+    sleep(1)
+    print("- Installation stopped")
+    return
+  end
+
+  sleep(0.05)
+  TickProgressBar()
 end
 
-print("--- Applying settings")
-print()
+print("- Applying settings")
+local oldWrite = term.write
+term.write = RedirectOutput
+local cursorX, cursorY = term.getCursorPos()
 if allowDisk then
   shell.run("set shell.allow_disk_startup true")
 else
   shell.run("set shell.allow_disk_startup false")
 end
+term.write = oldWrite
+term.setCursorPos(cursorX, cursorY)
+TickProgressBar()
 
-print("--- Rebooting")
+print("- Rebooting")
+sleep(2.5)
 os.reboot()
