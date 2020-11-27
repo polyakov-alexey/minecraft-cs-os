@@ -48,7 +48,7 @@ function this.Ping(ID)
 end
 ---------------------------------------------------
 function this.ProcessPing(inputID)
-  this.DisplayDebug("<-- 4 PING")
+  this.DisplayDebug("<-- [" .. inputID .."] PING")
   IDTable[inputID] = inputID
 end
 ---------------------------------------------------
@@ -70,7 +70,7 @@ function this.IDTableBroadcast()
 end
 ---------------------------------------------------
 function this.ProcessIDTable(inputID, inputIDTable)
-  this.DisplayDebug("<-- 4 IDT")
+  this.DisplayDebug("<-- [" .. inputID .."] IDT")
   IDTable[inputID] = inputID
   for target, id in pairs(inputIDTable) do
       if IDTable[target] ~= ID and target ~= ID then
