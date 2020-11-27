@@ -135,27 +135,18 @@ function this.Start()
     if not rednet.isOpen() then
         termTextColor = term.getTextColor()
         term.setTextColor(colors.red)
-        this.DisplayError("### Rednet connection is not opened")
+        this.DisplayError("### Rednet: ERROR")
         term.setTextColor(termTextColor)
         return nil
     else
-      this.DisplayMessage("--- RedNet connection is opened")
+      this.DisplayMessage("--- RedNet: OK")
     end
 
-    this.DisplayMessage("--- Initiating PingBroadcast()")
-
-    this.DisplayMessage("--- Initiating PingBroadcast()")
     this.PingBroadcast()
 
-    this.DisplayMessage("--- Starting timerPing")
     timerPing = os.startTimer(math.random(timerPingMinTime, timerPingMaxTime))
-    -- print(" #" .. timerPing)
-
-    this.DisplayMessage("--- Starting timerIDTable")
     timerIDTable = os.startTimer(math.random(timerIDTableMinTime, timerIDTableMaxTime))
-    -- print(" #" .. timerIDTable)
 
-    this.DisplayMessage("--- Starting router loop")
     while (true) do
         event, id, msg = os.pullEvent()
 

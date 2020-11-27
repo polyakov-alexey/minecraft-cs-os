@@ -1,113 +1,11 @@
-local OSVersion = "CS-OS v.1.0 Router"
-
-local function DisplayMessage(message)
-  local termW, termH = term.getSize()
-  term.setCursorPos(1, termH)
-  term.clearLine()
-  term.write("> " .. message)
-end
-
-local function DisplayError(message)
-  local termW, termH = term.getSize()
-  term.setCursorPos(1, termH)
-  term.clearLine()
-  local termTextColor = term.getTextColor()
-  term.setTextColor(colors.red)
-  term.write("> ERROR: " .. message)
-  term.setTextColor(termTextColor)
-end
-
-term.clear()
-term.setCursorPos(1,1)
-
-advterm = require("/csos/lib/req-advterm")
-advterm.Enable()
-term.reset()
-print("> AdvancedTerminal module enabled")
-sleep(0.1)
-
-write("> Loading library class-progressbar ...")
-sleep(0.1)
-local pbarClass = require("/csos/lib/class-progressbar")
-print(" DONE")
-sleep(0.1)
-
-write("> Calculating terminal parameters ...")
-sleep(0.1)
-local termW, termH = term.getSize()
-local termTextColor = term.getTextColor()
-print(" DONE")
-sleep(0.1)
-
-term.reset()
-term.setCursorPos((termW - #OSVersion) / 2 + 1, termH / 2)
-term.setTextColor(colors.green)
-term.write(OSVersion)
-term.setTextColor(termTextColor)
-
-DisplayMessage("Initiating progress bar ...")
-sleep(0.1)
-local pbar = pbarClass.new(4, termH / 2 + 2, termW - 6, 5)
-pbar:Draw()
-DisplayMessage("Initiating progress bar ... DONE")
-sleep(0.1)
-
----------------------------------------------------
--- CUSTOM SECTION START
----------------------------------------------------
-
-DisplayMessage("Loading module req-network ...")
-pbar:IncValue()
-sleep(0.1)
-local network = require("/csos/lib/req-network")
-DisplayMessage("Loading module req-network ... DONE")
-pbar:IncValue()
-sleep(0.1)
-
-DisplayMessage("Detecting RedNet modem ...")
-pbar:IncValue()
-sleep(0.1)
-local modem = peripheral.find("modem")
-if not modem then
-  DisplayError("MODEM NOT FOUND")
-  pbar:IncValue()
-  sleep (5)
-  os.shutdown()
-end
-
-local modemSide = nil
-for _,side in ipairs({"top", "bottom", "front", "back", "left", "right"}) do
-  if peripheral.isPresent(side) and peripheral.getType(side) == "modem" then
-    rednet.open(side)
-    modemSide = side
-    break
-  end
-end
-
-if not modemSide then
-  DisplayError("REDNET OPENING ERROR")
-  pbar:IncValue()
-  sleep (5)
-  os.shutdown()
-end
-
-DisplayMessage("Modem detected on " .. modemSide .. " side")
-pbar:IncValue()
-sleep(0.1)
-
----------------------------------------------------
--- CUSTOM SECTION END
----------------------------------------------------
-
-DisplayMessage("OS is ready. Starting network cycle")
-pbar:IncValue()
-pbar:Draw()
-sleep(1)
+local startup = require("/csos/req-router")
+startup.Start()
 
 term.reset()
 term.setTextScale(0.5)
 term.setTextColor(colors.green)
-print(OSVersion .. " #" .. os.getComputerID())
+print(startup.GetVersion() .. " Router Mode #" .. os.getComputerID())
 term.setTextColor(termTextColor)
 
+network = require("/csos/lib/req-network")
 network.Start()
