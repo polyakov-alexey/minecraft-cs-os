@@ -1,0 +1,11 @@
+local startup = require("/csos/regimes/req-router")
+startup.Start()
+
+term.reset()
+term.setTextScale(0.5)
+term.setTextColor(colors.green)
+print(startup.GetVersion() .. " Router Mode #" .. os.getComputerID())
+term.setTextColor(termTextColor)
+
+network = require("/csos/lib/req-network")
+network.Start()

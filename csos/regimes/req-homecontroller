@@ -1,23 +1,17 @@
 local this={}
 ---------------------------------------------------
-local SETTING_Alarm_Time1 = 17
-local SETTING_Alarm_Time2 = 18
-local SETTING_Light_Side = "right"
-local SETTING_Light_ONTime = 18
-local SETTING_Light_OFFTime = 7
----------------------------------------------------
 local advterm = require("/csos/lib/req-advterm")
 local libframe = require("/csos/lib/class-frame")
 local advtime = require("/csos/lib/req-advtime")
 local libspeaker = require("/csos/lib/req-speaker")
 local liblight = require("/csos/home/req-light")
+local libnightalarm = require("/csos/lib/req-nightalarm")
 ---------------------------------------------------
 local termTextColor = term.getTextColor()
 local termBackgroundColor = term.getBackgroundColor()
 local termW, termH = term.getSize()
 ---------------------------------------------------
 local incomingMsgs = 1
-local alarmLevel = 3
 ---------------------------------------------------
 function this.Init()
   advterm.Enable()
@@ -26,21 +20,17 @@ function this.Init()
   termBackgroundColor = term.getBackgroundColor()
   termW, termH = term.getSize()
 
-  libspeaker.Find()
-  liblight.Init("right")
-
   this.DrawTopBar()
   this.DrawLightControl()
 end
 ---------------------------------------------------
 function this.Tick()
-  local alarmRequired = this.CalculateAlarmLevel()
   local lightStateChanged = liblight.Tick()
 
   this.DrawTopBar()
   if lightStateChanged then this.DrawLightControl() end
 
-  if alarmRequired then libspeaker.Alarm(alarmLevel) end
+  libnightalarm.Tick()
 end
 ---------------------------------------------------
 function this.DrawTopBar()
@@ -52,6 +42,7 @@ function this.DrawTopBar()
     msgsString = "[Msgs:" .. incomingMsgs .. "]"
   end
 
+  local alarmLevel = libnightalarm.GetAlarmLevel()
   local alarmSymbol = "#"
   local alarmString = ""
   while alarmString:len() < alarmLevel and alarmString:len() < 3 do
@@ -69,29 +60,6 @@ function this.DrawTopBar()
   write(string.format(" %5s", advtime.Get()))
   term.setTextColor(termTextColor)
   term.setBackgroundColor(termBackgroundColor)
-end
----------------------------------------------------
--- return value: bool alarmRequired
-function this.CalculateAlarmLevel()
-  local time = os.time()
-  if time < 7 then
-    alarmLevel = 3
-    return false
-  end
-  if time < SETTING_Alarm_Time1 then
-    alarmLevel = 0
-    return false
-  end
-  local newAlarmLevel = 0
-  if time > 19 then newAlarmLevel = 3
-  elseif time > SETTING_Alarm_Time2 then newAlarmLevel = 2
-  else newAlarmLevel = 1
-  end
-  if newAlarmLevel == alarmLevel then
-    return false
-  end
-  alarmLevel = newAlarmLevel
-  return true
 end
 ---------------------------------------------------
 function this.DrawLightControl()

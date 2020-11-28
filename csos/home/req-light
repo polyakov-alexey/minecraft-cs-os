@@ -1,25 +1,17 @@
 local this={}
 
-local side = "right"
-local timeON = 18
-local timeOFF = 7
 ---------------------------------------------------
 local state = false
 local regime = "AUTO"
 ---------------------------------------------------
-function this.Init(side_, timeON_, timeOFF_)
-  side = side_
-  timeON = timeON_ or 18
-  timeOFF = timeOFF_ or 7
-end
+local cfg = require("/csos/cfg/light")
+local side = cfg.GetRedstoneSide()
+local timeON = cfg.GetTimeON()
+local timeOFF = cfg.GetTimeOFF()
 ---------------------------------------------------
-function this.GetRegime()
-  return regime
-end
+function this.GetRegime() return regime end
 ---------------------------------------------------
-function this.GetState()
-  return state
-end
+function this.GetState() return state end
 ---------------------------------------------------
 function this.SetON()
   regime = "ON"
@@ -33,9 +25,7 @@ function this.SetOFF()
   redstone.setOutput(side, state)
 end
 ---------------------------------------------------
-function this.SetAuto()
-  regime = "AUTO"
-end
+function this.SetAuto() regime = "AUTO" end
 ---------------------------------------------------
 -- return value: bool stateChanged
 function this.Tick()

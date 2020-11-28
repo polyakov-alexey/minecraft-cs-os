@@ -1,5 +1,4 @@
 local libhome = require("/csos/regimes/req-homecontroller")
-
 libhome.Init()
 while true do
   libhome.Tick()

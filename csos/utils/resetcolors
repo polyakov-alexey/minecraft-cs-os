@@ -1,0 +1,7 @@
+term.setTextColor(colors.white)
+term.setBackgroundColor(colors.black)
+local advterm = require("/csos/lib/req-advterm")
+advterm.Enable()
+term.setTextColor(colors.white)
+term.setBackgroundColor(colors.black)
+advterm.Disable()

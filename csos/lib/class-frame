@@ -14,11 +14,6 @@ function this.new(x, y, w, h, label, frameColor, textColor)
   return self
 end
 
-function this:Debug()
-  print("[#] (" .. self.x .. ", " .. self.y .. ") " .. self.w .. "x" .. self.h .. ", \"" .. self.label .. "\"" .. ", " .. self.frameColor .. ", " .. self.textColor)
-  print("[#] " .. #self.label)
-end
-
 function this:Draw()
   termTextColor = term.getTextColor()
   termBackgroundColor = term.getBackgroundColor()

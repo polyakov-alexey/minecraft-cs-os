@@ -1,0 +1,30 @@
+local this={}
+---------------------------------------------------
+local alarmLevel = 0
+---------------------------------------------------
+local cfg = require("/csos/cfg/nightalarm")
+local libspeaker = require("/csos/lib/req-speaker")
+---------------------------------------------------
+function this.GetAlarmLevel() return alarmLevel end
+---------------------------------------------------
+function this.Tick()
+  local time = os.time()
+  if time < 7 then
+    alarmLevel = 3
+    return
+  end
+  if time < cfg.GetWarningTime1() then
+    alarmLevel = 0
+    return
+  end
+  local newAlarmLevel = 0
+  if time > 19 then newAlarmLevel = 3
+  elseif time > cfg.GetWarningTime2() then newAlarmLevel = 2
+  else newAlarmLevel = 1 end
+  if newAlarmLevel == alarmLevel then return false end
+  libspeaker.Alarm(newAlarmLevel)
+  alarmLevel = newAlarmLevel
+  return true
+end
+---------------------------------------------------
+return this

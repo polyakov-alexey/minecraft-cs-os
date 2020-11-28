@@ -1,0 +1,20 @@
+---------------------------------------------------
+-- USER SETTINGS
+---------------------------------------------------
+
+REDSTONE_SIDE = "right"
+TIME_ON = 18
+TIME_OFF = 7
+
+
+
+
+
+---------------------------------------------------
+-- DO NOT CHANGE CODE BELOW THIS LINE
+---------------------------------------------------
+local this={}
+function this.GetRedstoneSide() return REDSTONE_SIDE end
+function this.GetTimeON() return TIME_ON end
+function this.GetTimeOFF() return TIME_OFF end
+return this
