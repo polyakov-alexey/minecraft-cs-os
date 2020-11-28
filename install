@@ -18,7 +18,8 @@ local applications = {
   "/csos/regimes/startup-router",
   "/csos/utils/resetcolors",
   "/csos/req-startup",
-  "/startup"
+  "/startup",
+  "/install"
 }
 
 local doneStepsCount = 0
