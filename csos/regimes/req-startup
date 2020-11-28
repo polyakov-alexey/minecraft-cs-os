@@ -77,9 +77,18 @@ function this.Start(extrasteps)
 
   this.DisplayMessage("Initiating progress bar ...")
   this.Sleep()
-  pbar = pbarClass.new(4, termH / 2 + 2, termW - 6, 1 + extrasteps)
+  pbar = pbarClass.new(4, termH / 2 + 2, termW - 6, 3 + extrasteps)
   pbar:Draw()
   this.DisplayMessage("Initiating progress bar ... DONE")
+  this.Sleep()
+
+  this.DisplayMessage("Loading library req-speaker ...")
+  this.ProgressTick()
+  this.Sleep()
+  libspeaker = require("/csos/lib/req-speaker")
+  pbar:Draw()
+  this.DisplayMessage("Loading library req-speaker ... DONE")
+  this.ProgressTick()
   this.Sleep()
 
   if authPassword ~= "" then
@@ -98,6 +107,8 @@ function this.Finish()
   this.DisplayMessage("Operating System boot complete")
   this.ProgressTick()
   sleep(2.5)
+  this.Auth()
+  libspeaker.Success()
 end
 ---------------------------------------------------
 function this.Auth()
@@ -134,7 +145,7 @@ function this.Auth()
       term.setTextColor(colors.green)
       print("Access granted")
       term.setTextColor(termTextColor)
-      sleep(1)
+      sleep(0.5)
       break
     else
       term.setCursorPos(termW / 2 - 16 + 1, 13)
@@ -143,6 +154,7 @@ function this.Auth()
       term.setCursorPos(termW / 2 - 5 + 1, 14)
       print("Try again")
       term.setTextColor(termTextColor)
+      libspeaker.Error()
       sleep(2)
     end
   end

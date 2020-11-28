@@ -1,15 +1,12 @@
 local this={}
-
-local speaker = nil
-
--- harp bass snare hat basedrum flute bell chime guitar
+-- "harp", "bass", "snare", "hat", "basedrum", "flute", "bell", "chime", "guitar"
 ---------------------------------------------------
-function this.Find()
-  speaker = peripheral.find("speaker")
-  return speaker;
-end
+local speaker = peripheral.find("speaker")
 ---------------------------------------------------
-function this.SoundOnStart()
+function this.GetSpeaker() return speaker end
+---------------------------------------------------
+function this.Success()
+  if not speaker then return end
   local instrument = "chime"
   speaker.playNote(instrument,1,0)
   sleep(0.1)
@@ -21,7 +18,15 @@ function this.SoundOnStart()
   sleep(0.1)
 end
 ---------------------------------------------------
+function this.Error()
+  if not speaker then return end
+  local instrument = "bass"
+  speaker.playNote(instrument,1,0)
+  sleep(0.1)
+end
+---------------------------------------------------
 function this.Alarm(alarmLevel)
+  if not speaker then return end
   local level = alarmLevel or 3
   for i = 1, level do
     speaker.playNote("chime", level)
@@ -30,20 +35,22 @@ function this.Alarm(alarmLevel)
 end
 ---------------------------------------------------
 function this.Demo()
-  local list = {"harp", "flute", "bell", "chime"}
+  if not speaker then return end
+  --local list = {"harp", "flute", "bell", "chime"}
+  local list = {"harp", "bass", "flute", "guitar"}
   for _,i in ipairs(list) do
     print(i)
     speaker.playNote(i, 3)
     sleep(0.25)
-    speaker.playNote(i, 3)
-    sleep(0.25)
-    speaker.playNote(i, 3)
-    sleep(0.25)
-    speaker.playNote(i, 3)
-    sleep(0.25)
-    speaker.playNote(i, 3)
+    --speaker.playNote(i, 3)
+    --sleep(0.25)
+    --speaker.playNote(i, 3)
+    --sleep(0.25)
+    --speaker.playNote(i, 3)
+    --sleep(0.25)
+    --speaker.playNote(i, 3)
     sleep(2)
   end
 end
-
+---------------------------------------------------
 return this
