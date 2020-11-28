@@ -1,12 +1,23 @@
 local applications = {
+  "/csos/cfg/auth",
+  "/csos/cfg/light",
+  "/csos/cfg/nightalarm",
+  "/csos/home/req-light",
+  "/csos/lib/class-button",
   "/csos/lib/class-frame",
   "/csos/lib/class-progressbar",
   "/csos/lib/req-advterm",
+  "/csos/lib/req-advtime",
+  "/csos/lib/req-buttons",
   "/csos/lib/req-network",
+  "/csos/lib/req-nightalarm",
+  "/csos/lib/req-speaker",
+  "/csos/regimes/req-homecontroller",
+  "/csos/regimes/req-router",
+  "/csos/regimes/startup-desktop",
+  "/csos/regimes/startup-router",
+  "/csos/utils/resetcolors",
   "/csos/req-startup",
-  "/csos/req-router",
-  "/csos/desktop-startup",
-  "/csos/router-startup",
   "/startup"
 }
 
@@ -14,6 +25,14 @@ local doneStepsCount = 0
 local totalStepsCount = #applications + 4
 local function DrawProgressBar()
   local cursorX, cursorY = term.getCursorPos()
+  term.setCursorPos(1,1)
+  term.clearLine()
+  termTextColor = term.getTextColor()
+  term.setTextColor(colors.green)
+  write("CS-OS Installation")
+  term.setTextColor(termTextColor)
+  term.setCursorPos(1,2)
+  term.clearLine()
   term.setCursorPos(1,3)
   term.clearLine()
   local string = "["
@@ -21,6 +40,8 @@ local function DrawProgressBar()
   while string:len() < (totalStepsCount + 1) do string = string .. "." end
   string = string .. "]"
   print(string)
+  term.setCursorPos(1,4)
+  term.clearLine()
   term.setCursorPos(cursorX, cursorY)
 end
 local function TickProgressBar()
@@ -29,16 +50,12 @@ local function TickProgressBar()
 end
 local function RedrawWindow()
   term.clear()
-  term.setCursorPos(1,1)
-  termTextColor = term.getTextColor()
-  term.setTextColor(colors.green)
-  write("CS-OS Installation")
-  term.setTextColor(termTextColor)
   DrawProgressBar()
   term.setCursorPos(1,5)
 end
 
 RedrawWindow()
+
 local deleteOld = false
 if fs.exists("/csos") then
   print("There is another version of CS-OS on your computer.")
@@ -82,17 +99,24 @@ local lastRedirectOutput = nil
 local function RedirectOutput(string)
   lastRedirectOutput = string or "NOSTRING"
 end
+local function DoNothing() end
 
 for _,app in ipairs(applications) do
   print("- Installing " .. app)
-  fs.makeDir(fs.getDir(app) or "")
-
+  DrawProgressBar()
   local oldWrite = term.write
+  local oldSetCursorPos = term.setCursorPos
+  local oldScroll = term.scroll
   term.write = RedirectOutput
+  term.setCursorPos = DoNothing
+  term.scroll = DoNothing
   local cursorX, cursorY = term.getCursorPos()
+  fs.makeDir(fs.getDir(app) or "")
   shell.run("wget https://raw.githubusercontent.com/polyakov-alexey/minecraft-cs-os/main" .. app .. " " .. app)
   term.write = oldWrite
+  term.setCursorPos = oldSetCursorPos
   term.setCursorPos(cursorX, cursorY)
+  term.scroll = oldScroll
 
   if lastRedirectOutput == "Failed." then
     termTextColor = term.getTextColor()
@@ -104,7 +128,7 @@ for _,app in ipairs(applications) do
     return
   end
 
-  sleep(0.05)
+  sleep(0.1)
   TickProgressBar()
 end
 
@@ -117,5 +141,6 @@ end
 TickProgressBar()
 
 print("- Rebooting")
+DrawProgressBar()
 sleep(2.5)
 os.reboot()
