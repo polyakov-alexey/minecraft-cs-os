@@ -4,7 +4,6 @@ local advterm = require("/csos/lib/req-advterm")
 local libframe = require("/csos/lib/class-frame")
 local advtime = require("/csos/lib/req-advtime")
 local libspeaker = require("/csos/lib/req-speaker")
-local liblight = require("/csos/home/req-light")
 local libnightalarm = require("/csos/lib/req-nightalarm")
 local libbuttons = require("/csos/lib/req-buttons")
 ---------------------------------------------------
@@ -21,19 +20,16 @@ function this.Init()
   termBackgroundColor = term.getBackgroundColor()
   termW, termH = term.getSize()
 
-  libbuttons.CreateButton(4,7,3,1,liblight.SetOFF)
-  libbuttons.CreateButton(8,7,3,1,liblight.SetAuto)
-  libbuttons.CreateButton(12,7,3,1,liblight.SetON)
+  --libbuttons.CreateButton(4,7,3,1,)
+  --libbuttons.CreateButton(8,7,3,1,)
+  --libbuttons.CreateButton(12,7,3,1,)
 
   --this.DrawTopBar()
-  this.DrawLightControl()
+  --this.DrawLightControl()
 end
 ---------------------------------------------------
 function this.Tick()
-  local lightStateChanged = liblight.Tick()
-
   this.DrawTopBar()
-  if lightStateChanged then this.DrawLightControl() end
 
   libnightalarm.Tick()
 end

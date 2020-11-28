@@ -1,0 +1,60 @@
+local this={}
+this.__index = this
+---------------------------------------------------
+function this.new(side, TimeON, TimeOFF)
+  local self={}
+  setmetatable(self, this)
+  self.side = side or "back"
+  self.TimeON =  TimeON or 18
+  self.TimeOFF = TimeOFF or 7
+  self.regime = "AUTO"
+  self.wasChanged = false
+  return self
+end
+---------------------------------------------------
+function this:GetRegime() return self.regime end
+---------------------------------------------------
+function this:GetState() return redstone.GetOutput(self.side) end
+---------------------------------------------------
+function this:SetON()
+  self.regime = "ON"
+  redstone.setOutput(side, state)
+  self.wasChanged = true
+end
+---------------------------------------------------
+function this:SetOFF()
+  self.regime = "OFF"
+  redstone.setOutput(side, state)
+  self.wasChanged = true
+end
+---------------------------------------------------
+function this:SetAuto()
+  self.regime = "AUTO"
+  self.wasChanged = true
+end
+---------------------------------------------------
+-- return value: bool
+function this:Tick()
+  if self.regime == "AUTO" then
+    local time = os.time()
+    if time >= self.TimeON then
+      if not redstone.getOutput(self.side) then
+        redstone.setOutput(self.side, true)
+      end
+      return true
+    end
+    if time >= self.TimeOFF then
+      if redstone.getOutput(self.side) then
+        redstone.setOutput(self.side, false)
+      end
+      return true
+    end
+  end
+  if self.wasChanged then
+    self.wasChanged = false
+    return true
+  end
+  return false
+end
+---------------------------------------------------
+return this

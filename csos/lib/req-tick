@@ -1,0 +1,24 @@
+local this={}
+---------------------------------------------------
+local subscribers={}
+local timerID = nil
+local period = nil
+---------------------------------------------------
+function this.AddSubscriber(f)
+  subscribers[#subscribers + 1] = f
+end
+---------------------------------------------------
+function this.SetPeriod(seconds)
+  period = seconds
+  timerID = os.startTimer(period)
+end
+---------------------------------------------------
+function this.ProcessEvent(event, id)
+  if event ~= "timer" or id ~= timerID then return end
+  for _,f in ipairs(subscribers) do
+    f()
+  end
+  timerID = os.startTimer(period)
+end
+---------------------------------------------------
+return this
