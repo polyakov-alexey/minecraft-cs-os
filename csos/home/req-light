@@ -1,0 +1,54 @@
+local this={}
+
+local side = "right"
+local timeON = 18
+local timeOFF = 7
+---------------------------------------------------
+local state = false
+local regime = "AUTO"
+---------------------------------------------------
+function this.Init(side_, timeON_, timeOFF_)
+  side = side_
+  timeON = timeON_ or 18
+  timeOFF = timeOFF_ or 7
+end
+---------------------------------------------------
+function this.GetRegime()
+  return regime
+end
+---------------------------------------------------
+function this.GetState()
+  return state
+end
+---------------------------------------------------
+function this.SetON()
+  regime = "ON"
+  state = true
+  redstone.setOutput(side, state)
+end
+---------------------------------------------------
+function this.SetOFF()
+  regime = "OFF"
+  state = false
+  redstone.setOutput(side, state)
+end
+---------------------------------------------------
+function this.SetAuto()
+  regime = "AUTO"
+end
+---------------------------------------------------
+-- return value: bool stateChanged
+function this.Tick()
+  if regime ~= "AUTO" then return false end
+  local time = os.time()
+  local newState = false
+  if time < timeOFF or time > timeON then
+    newState = true
+  end
+  if newState == state then return false end
+  redstone.setOutput(side, newState)
+  state = newState
+  return true
+end
+---------------------------------------------------
+return this

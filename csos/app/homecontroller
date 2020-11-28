@@ -1,0 +1,7 @@
+local libhome = require("/csos/regimes/req-homecontroller")
+
+libhome.Init()
+while true do
+  libhome.Tick()
+  sleep(0.25)
+end

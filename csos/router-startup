@@ -1,4 +1,4 @@
-local startup = require("/csos/req-router")
+local startup = require("/csos/regimes/req-router")
 startup.Start()
 
 term.reset()

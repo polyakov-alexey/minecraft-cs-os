@@ -1,0 +1,54 @@
+local this={}
+
+local startup = require("/csos/req-startup")
+
+---------------------------------------------------
+function this.GetVersion()
+  return startup.GetVersion()
+end
+---------------------------------------------------
+function this.Start()
+  startup.Start(4)
+
+  startup.DisplayMessage("Loading module req-network ...")
+  startup.ProgressTick()
+  startup.Sleep()
+
+  local network = require("/csos/lib/req-network")
+  startup.DisplayMessage("Loading module req-network ... DONE")
+  startup.ProgressTick()
+  startup.Sleep()
+
+  startup.DisplayMessage("Detecting RedNet modem ...")
+  startup.ProgressTick()
+  startup.Sleep()
+  local modem = peripheral.find("modem")
+  if not modem then
+    startup.DisplayError("MODEM NOT FOUND")
+    sleep (5)
+    os.shutdown()
+  end
+
+  local modemSide = nil
+  for _,side in ipairs({"top", "bottom", "front", "back", "left", "right"}) do
+    if peripheral.isPresent(side) and peripheral.getType(side) == "modem" then
+      rednet.open(side)
+      modemSide = side
+      break
+    end
+  end
+
+  if not modemSide then
+    startup.DisplayError("REDNET OPENING ERROR")
+    sleep (5)
+    os.shutdown()
+  end
+
+  startup.DisplayMessage("Modem detected on " .. modemSide .. " side")
+  startup.ProgressTick()
+  startup.Sleep()
+
+  startup.Finish()
+end
+
+return this

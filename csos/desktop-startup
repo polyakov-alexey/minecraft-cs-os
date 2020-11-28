@@ -1,7 +1,8 @@
-local startup = require("/csos/req-startup")
+local startup = require("/csos/regimes/req-startup")
 startup.Start()
 
 startup.Finish()
+startup.Auth()
 
 term.reset()
 advterm.Disable()

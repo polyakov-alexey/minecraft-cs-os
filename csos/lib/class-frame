@@ -8,9 +8,9 @@ function this.new(x, y, w, h, label, frameColor, textColor)
   self.y = y
   self.w = w
   self.h = h
-  self.label = label
-  self.frameColor = frameColor
-  self.textColor = textColor
+  self.label = label or ""
+  self.frameColor = frameColor or colors.lightGray
+  self.textColor = textColor or colors.white
   return self
 end
 
@@ -30,20 +30,24 @@ function this:Draw()
   -------------------------------------------------
   term.setCursorPos(self.x, self.y)
   term.setBackgroundColor(self.frameColor)
-  term.write("  ")
-  term.setBackgroundColor(termBackgroundColor)
-  term.write(" ")
-  local maxLabelLength = self.w - 6;
-  local labelString = self.label
-  if (maxLabelLength < #self.label) then
-    labelString = self.label:sub(1, maxLabelLength)
+  if self.label == "" then -- no label frame
+    local s = ""
+    while s:len() < self.w do s = s .. " " end
+    term.write(s)
+  else
+    term.write("  ")
+    term.setBackgroundColor(termBackgroundColor)
+    local maxLabelLength = self.w - 6;
+    local labelString = self.label
+    if (maxLabelLength < #self.label) then
+      labelString = self.label:sub(1, maxLabelLength)
+    end
+    term.write(" " .. labelString .. " ")
+    term.setBackgroundColor(self.frameColor)
+    local s = ""
+    while (s:len() < (self.w - 4 - #labelString)) do s = s .. " " end
+    term.write(s)
   end
-  term.write(labelString)
-  term.write(" ")
-  term.setBackgroundColor(self.frameColor)
-  local s = ""
-  while (s:len() < (self.w - 4 - #labelString)) do s = s .. " " end
-  term.write(s)
 
   -------------------------------------------------
   -- Intermediate strings

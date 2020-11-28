@@ -1,0 +1,130 @@
+local this={}
+---------------------------------------------------
+local SETTING_Alarm_Time1 = 17
+local SETTING_Alarm_Time2 = 18
+local SETTING_Light_Side = "right"
+local SETTING_Light_ONTime = 18
+local SETTING_Light_OFFTime = 7
+---------------------------------------------------
+local advterm = require("/csos/lib/req-advterm")
+local libframe = require("/csos/lib/class-frame")
+local advtime = require("/csos/lib/req-advtime")
+local libspeaker = require("/csos/lib/req-speaker")
+local liblight = require("/csos/home/req-light")
+---------------------------------------------------
+local termTextColor = term.getTextColor()
+local termBackgroundColor = term.getBackgroundColor()
+local termW, termH = term.getSize()
+---------------------------------------------------
+local incomingMsgs = 1
+local alarmLevel = 3
+---------------------------------------------------
+function this.Init()
+  advterm.Enable()
+  term.reset()
+  termTextColor = term.getTextColor()
+  termBackgroundColor = term.getBackgroundColor()
+  termW, termH = term.getSize()
+
+  libspeaker.Find()
+  liblight.Init("right")
+
+  this.DrawTopBar()
+  this.DrawLightControl()
+end
+---------------------------------------------------
+function this.Tick()
+  local alarmRequired = this.CalculateAlarmLevel()
+  local lightStateChanged = liblight.Tick()
+
+  this.DrawTopBar()
+  if lightStateChanged then this.DrawLightControl() end
+
+  if alarmRequired then libspeaker.Alarm(alarmLevel) end
+end
+---------------------------------------------------
+function this.DrawTopBar()
+  term.setCursorPos(1,1)
+  term.setBackgroundColor(colors.green)
+
+  local msgsString = ""
+  if incomingMsgs ~= 0 then
+    msgsString = "[Msgs:" .. incomingMsgs .. "]"
+  end
+
+  local alarmSymbol = "#"
+  local alarmString = ""
+  while alarmString:len() < alarmLevel and alarmString:len() < 3 do
+    alarmString = alarmString .. alarmSymbol
+  end
+
+  term.setTextColor(colors.black)
+  write(msgsString)
+  -- 5 - time length
+  -- 1 - space between alarm and time
+  term.write(string.format("%" .. (termW - msgsString:len() - alarmString:len() - 5 - 1) .. "s", ""))
+  term.setTextColor(colors.red)
+  write(alarmString)
+  term.setTextColor(colors.black)
+  write(string.format(" %5s", advtime.Get()))
+  term.setTextColor(termTextColor)
+  term.setBackgroundColor(termBackgroundColor)
+end
+---------------------------------------------------
+-- return value: bool alarmRequired
+function this.CalculateAlarmLevel()
+  local time = os.time()
+  if time < 7 then
+    alarmLevel = 3
+    return false
+  end
+  if time < SETTING_Alarm_Time1 then
+    alarmLevel = 0
+    return false
+  end
+  local newAlarmLevel = 0
+  if time > 19 then newAlarmLevel = 3
+  elseif time > SETTING_Alarm_Time2 then newAlarmLevel = 2
+  else newAlarmLevel = 1
+  end
+  if newAlarmLevel == alarmLevel then
+    return false
+  end
+  alarmLevel = newAlarmLevel
+  return true
+end
+---------------------------------------------------
+function this.DrawLightControl()
+  local x = 2
+  local y = 3
+  local frame = libframe.new(x,y,15,7,"Lights")
+  frame:Draw()
+  term.setCursorPos(x + 2, y + 2)
+  if liblight.GetState() then
+    term.setBackgroundColor(colors.yellow)
+  else
+    term.setBackgroundColor(colors.gray)
+  end
+  write("           ")
+  local colorOFF = colors.gray
+  local colorAUTO = colors.gray
+  local colorON = colors.gray
+  local regime = liblight.GetRegime()
+  if regime == "OFF" then colorOFF = colors.red end
+  if regime == "AUTO" then colorAUTO = colors.orange end
+  if regime == "ON" then colorON = colors.green end
+  term.setTextColor(colors.white)
+  term.setCursorPos(x + 2, y + 4)
+  term.setBackgroundColor(colorOFF)
+  write(" x ")
+  term.setCursorPos(x + 6, y + 4)
+  term.setBackgroundColor(colorAUTO)
+  write(" a ")
+  term.setCursorPos(x + 10, y + 4)
+  term.setBackgroundColor(colorON)
+  write(" + ")
+  term.setTextColor(termTextColor)
+  term.setBackgroundColor(termBackgroundColor)
+end
+---------------------------------------------------
+return this

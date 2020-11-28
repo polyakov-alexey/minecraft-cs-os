@@ -1,0 +1,13 @@
+local this={}
+
+function this.Get()
+  local time = os.time()
+  local hours = math.floor(time)
+  local minutes = math.floor((time - hours) * 60)
+  local minutesString = minutes
+  if minutes < 10 then minutesString = "0" .. minutesString end
+  local timeString = string.format("%2u:", hours) .. minutesString
+  return timeString
+end
+
+return this

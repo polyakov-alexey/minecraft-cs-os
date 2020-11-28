@@ -1,0 +1,49 @@
+local this={}
+
+local speaker = nil
+
+-- harp bass snare hat basedrum flute bell chime guitar
+---------------------------------------------------
+function this.Find()
+  speaker = peripheral.find("speaker")
+  return speaker;
+end
+---------------------------------------------------
+function this.SoundOnStart()
+  local instrument = "chime"
+  speaker.playNote(instrument,1,0)
+  sleep(0.1)
+  speaker.playNote(instrument,1,8)
+  sleep(0.1)
+  speaker.playNote(instrument,1,16)
+  sleep(0.1)
+  speaker.playNote(instrument,1,24)
+  sleep(0.1)
+end
+---------------------------------------------------
+function this.Alarm(alarmLevel)
+  local level = alarmLevel or 3
+  for i = 1, level do
+    speaker.playNote("chime", level)
+    sleep(0.5)
+  end
+end
+---------------------------------------------------
+function this.Demo()
+  local list = {"harp", "flute", "bell", "chime"}
+  for _,i in ipairs(list) do
+    print(i)
+    speaker.playNote(i, 3)
+    sleep(0.25)
+    speaker.playNote(i, 3)
+    sleep(0.25)
+    speaker.playNote(i, 3)
+    sleep(0.25)
+    speaker.playNote(i, 3)
+    sleep(0.25)
+    speaker.playNote(i, 3)
+    sleep(2)
+  end
+end
+
+return this

@@ -1,0 +1,160 @@
+local this={}
+
+---------------------------------------------------
+local SETTING_AUTH_Login = "admin"
+local SETTING_AUTH_Password = ""
+---------------------------------------------------
+
+local version = "CS-OS v.2.0"
+local termW = 0
+local termH = 0
+local pbar = nil
+
+local libframe = nil
+
+local tickSleepDuration = 0.1
+
+---------------------------------------------------
+local termTextColor = term.getTextColor()
+local termBackgroundColor = term.getBackgroundColor()
+local termW, termH = term.getSize()
+---------------------------------------------------
+function this.GetVersion()
+  return version
+end
+---------------------------------------------------
+function this.Sleep()
+  sleep(tickSleepDuration)
+end
+---------------------------------------------------
+function this.DisplayMessage(message)
+  term.setCursorPos(1, termH)
+  term.clearLine()
+  term.write("> " .. message)
+end
+---------------------------------------------------
+function this.DisplayError(message)
+  term.setCursorPos(1, termH)
+  term.clearLine()
+  term.setTextColor(colors.red)
+  term.write("> ERROR: " .. message)
+  term.setTextColor(termTextColor)
+end
+---------------------------------------------------
+function this.ProgressTick()
+  pbar:IncValue()
+  pbar:Draw()
+end
+---------------------------------------------------
+function this.Start(extrasteps)
+  if extrasteps == nil then extrasteps = 0 end
+  if SETTING_AUTH_Password ~= "" then
+    extrasteps = extrasteps + 2
+  end
+
+  term.clear()
+  term.setCursorPos(1,1)
+
+  advterm = require("/csos/lib/req-advterm")
+  advterm.Enable()
+  term.reset()
+  print("> AdvancedTerminal module enabled")
+  this.Sleep()
+
+  write("> Loading library class-progressbar ...")
+  this.Sleep()
+  local pbarClass = require("/csos/lib/class-progressbar")
+  print(" DONE")
+  this.Sleep()
+
+  write("> Calculating terminal parameters ...")
+  this.Sleep()
+  termW, termH = term.getSize()
+  termTextColor = term.getTextColor()
+  print(" DONE")
+  this.Sleep()
+
+  term.reset()
+  term.setCursorPos((termW - #version) / 2 + 1, termH / 2)
+  term.setTextColor(colors.green)
+  term.write(version)
+  term.setTextColor(termTextColor)
+
+  this.DisplayMessage("Initiating progress bar ...")
+  this.Sleep()
+  pbar = pbarClass.new(4, termH / 2 + 2, termW - 6, 1 + extrasteps)
+  pbar:Draw()
+  this.DisplayMessage("Initiating progress bar ... DONE")
+  this.Sleep()
+
+  if SETTING_AUTH_Password ~= "" then
+    this.DisplayMessage("Loading library class-frame ...")
+    this.ProgressTick()
+    this.Sleep()
+    libframe = require("/csos/lib/class-frame")
+    pbar:Draw()
+    this.DisplayMessage("Loading library class-frame ... DONE")
+    this.ProgressTick()
+    this.Sleep()
+  end
+end
+---------------------------------------------------
+function this.Finish()
+  this.DisplayMessage("Operating System boot complete")
+  this.ProgressTick()
+  sleep(2.5)
+end
+---------------------------------------------------
+function this.Auth()
+  if SETTING_AUTH_Password == "" then return end
+
+  while true do
+    term.reset()
+
+    term.setCursorPos(1, termH)
+    term.setTextColor(colors.green)
+    write(version)
+    term.setTextColor(termTextColor)
+
+    local frameW = 14 + math.max(SETTING_AUTH_Login:len(), SETTING_AUTH_Password:len())
+    local frameH = 7
+    local frameX = (termW - frameW) / 2 + 1
+    local frameY = 4
+    local frame = libframe.new(frameX, frameY, frameW, frameH, "Login", colors.green)
+    frame:Draw()
+
+    term.setCursorPos(termW / 2 - 6 + 1, termH - 1)
+    write("Hey, hacker")
+    term.setCursorPos(termW / 2 - 9 + 1, termH)
+    write("Ctrl+T still works")
+
+    term.setCursorPos(frameX + 2, frameY + 2)
+    write("Login   : " .. SETTING_AUTH_Login)
+    term.setCursorPos(frameX + 2, frameY + 4)
+    write("Password: ")
+    inputPassword = read("*")
+
+    if inputPassword == SETTING_AUTH_Password then
+      term.setCursorPos(termW / 2 - 7 + 1, 13)
+      term.setTextColor(colors.green)
+      print("Access granted")
+      term.setTextColor(termTextColor)
+      sleep(1)
+      break
+    else
+      term.setCursorPos(termW / 2 - 16 + 1, 13)
+      term.setTextColor(colors.red)
+      print("Wrong login/password combination")
+      term.setCursorPos(termW / 2 - 5 + 1, 14)
+      print("Try again")
+      term.setTextColor(termTextColor)
+      sleep(3)
+    end
+  end
+
+  term.reset()
+  term.setTextColor(termTextColor)
+  term.setBackgroundColor(termBackgroundColor)
+end
+---------------------------------------------------
+return this

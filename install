@@ -53,7 +53,7 @@ end
 TickProgressBar()
 
 RedrawWindow()
-local allowDisk = true
+local allowDiskStartup = true
 print("Do you want to allow disk startup?")
 print()
 print("Y - Yes, allow disk startup. Somebody theoretically can hack your computer")
@@ -62,7 +62,7 @@ print("N - No, forbid disk startup. You will not be able to easily unbrick your 
 print()
 write("> ")
 answer = read()
-if answer == "N" then allowDisk = false end
+if answer == "N" then allowDiskStartup = false end
 TickProgressBar()
 
 RedrawWindow()
@@ -109,16 +109,11 @@ for _,app in ipairs(applications) do
 end
 
 print("- Applying settings")
-local oldWrite = term.write
-term.write = RedirectOutput
-local cursorX, cursorY = term.getCursorPos()
-if allowDisk then
-  shell.run("set shell.allow_disk_startup true")
+if allowDiskStartup then
+  settings.set("shell.allow_disk_startup", true)
 else
-  shell.run("set shell.allow_disk_startup false")
+  settings.set("shell.allow_disk_startup", false)
 end
-term.write = oldWrite
-term.setCursorPos(cursorX, cursorY)
 TickProgressBar()
 
 print("- Rebooting")
