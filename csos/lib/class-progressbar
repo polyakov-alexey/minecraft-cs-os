@@ -1,4 +1,4 @@
-this = {}
+local this = {}
 this.__index = this
 
 function this.new(x, y, length, maxValue, progressColor, bgColor)

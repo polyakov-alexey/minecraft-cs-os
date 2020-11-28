@@ -6,6 +6,7 @@ local advtime = require("/csos/lib/req-advtime")
 local libspeaker = require("/csos/lib/req-speaker")
 local liblight = require("/csos/home/req-light")
 local libnightalarm = require("/csos/lib/req-nightalarm")
+local libbuttons = require("/csos/lib/req-buttons")
 ---------------------------------------------------
 local termTextColor = term.getTextColor()
 local termBackgroundColor = term.getBackgroundColor()
@@ -20,7 +21,11 @@ function this.Init()
   termBackgroundColor = term.getBackgroundColor()
   termW, termH = term.getSize()
 
-  this.DrawTopBar()
+  libbuttons.CreateButton(4,7,3,1,liblight.SetOFF)
+  libbuttons.CreateButton(8,7,3,1,liblight.SetAuto)
+  libbuttons.CreateButton(12,7,3,1,liblight.SetON)
+
+  --this.DrawTopBar()
   this.DrawLightControl()
 end
 ---------------------------------------------------
@@ -65,8 +70,8 @@ end
 function this.DrawLightControl()
   local x = 2
   local y = 3
-  local frame = libframe.new(x,y,15,7,"Lights")
-  frame:Draw()
+  local frame123 = libframe.new(x,y,15,7,"Lights")
+  frame123:Draw()
   term.setCursorPos(x + 2, y + 2)
   if liblight.GetState() then
     term.setBackgroundColor(colors.yellow)
@@ -93,6 +98,21 @@ function this.DrawLightControl()
   write(" + ")
   term.setTextColor(termTextColor)
   term.setBackgroundColor(termBackgroundColor)
+end
+---------------------------------------------------
+function this.Start()
+  this.Init()
+  local timer = os.startTimer(0.25)
+  while true do
+    event, p1, p2, p3 = os.pullEvent()
+    if event == "timer" then
+      this.Tick()
+      timer = os.startTimer(0.25)
+    end
+    if event == "monitor_touch" then
+      libbuttons.ProcessTouch(p2,p3)
+    end
+  end
 end
 ---------------------------------------------------
 return this

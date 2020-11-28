@@ -1,0 +1,21 @@
+local this = {}
+this.__index = this
+---------------------------------------------------
+function this:GetX() return self.x end
+function this:GetY() return self.y end
+function this:GetW() return self.w end
+function this:GetH() return self.h end
+function this:GetAction() return self.action end
+---------------------------------------------------
+function this.new(x, y, w, h, action)
+  local self = {}
+  setmetatable(self, this)
+  self.x = x
+  self.y = y
+  self.w = w
+  self.h = h
+  self.action = action
+  return self
+end
+---------------------------------------------------
+return this

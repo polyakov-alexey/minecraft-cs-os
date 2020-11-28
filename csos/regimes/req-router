@@ -1,6 +1,6 @@
 local this={}
 
-local startup = require("/csos/req-startup")
+local startup = require("/csos/regimes/req-startup")
 
 ---------------------------------------------------
 function this.GetVersion()

@@ -2,6 +2,7 @@ local this={}
 
 ---------------------------------------------------
 local state = false
+local stateChanged = false
 local regime = "AUTO"
 ---------------------------------------------------
 local cfg = require("/csos/cfg/light")
@@ -17,25 +18,42 @@ function this.SetON()
   regime = "ON"
   state = true
   redstone.setOutput(side, state)
+  stateChanged = true
 end
 ---------------------------------------------------
 function this.SetOFF()
   regime = "OFF"
   state = false
   redstone.setOutput(side, state)
+  stateChanged = true
 end
 ---------------------------------------------------
-function this.SetAuto() regime = "AUTO" end
+function this.SetAuto()
+  regime = "AUTO"
+  stateChanged = true
+end
 ---------------------------------------------------
 -- return value: bool stateChanged
 function this.Tick()
-  if regime ~= "AUTO" then return false end
+  if regime ~= "AUTO" then
+    if stateChanged then
+      stateChanged = false
+      return true
+    end
+    return false
+  end
   local time = os.time()
   local newState = false
   if time < timeOFF or time > timeON then
     newState = true
   end
-  if newState == state then return false end
+  if newState == state then
+    if stateChanged then
+      stateChanged = false
+      return true
+    end
+    return false
+  end
   redstone.setOutput(side, newState)
   state = newState
   return true

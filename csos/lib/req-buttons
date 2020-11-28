@@ -1,0 +1,26 @@
+local this={}
+---------------------------------------------------
+local buttons={}
+---------------------------------------------------
+local libbutton = require("/csos/lib/class-button")
+---------------------------------------------------
+local function IsInside(px,py,x,y,w,h)
+  if px >= x and px <= (x+w) and py >=y and py <= (y+h) then
+    return true
+  end
+  return false
+end
+---------------------------------------------------
+function this.CreateButton(x,y,w,h,action)
+  buttons[#buttons + 1] = libbutton.new(x,y,w,h,action)
+end
+---------------------------------------------------
+function this.ProcessTouch(x,y)
+  for _,btn in ipairs(buttons) do
+    if IsInside(x, y, btn:GetX(), btn:GetY(), btn:GetW(), btn:GetH()) then
+      btn:GetAction()()
+    end
+  end
+end
+---------------------------------------------------
+return this

@@ -1,6 +1,6 @@
-this = {}
+local this = {}
 this.__index = this
-
+---------------------------------------------------
 function this.new(x, y, w, h, label, frameColor, textColor)
   local self = {}
   setmetatable(self, this)
@@ -13,7 +13,7 @@ function this.new(x, y, w, h, label, frameColor, textColor)
   self.textColor = textColor or colors.white
   return self
 end
-
+---------------------------------------------------
 function this:Draw()
   termTextColor = term.getTextColor()
   termBackgroundColor = term.getBackgroundColor()
@@ -65,5 +65,5 @@ function this:Draw()
   term.setTextColor(termTextColor)
   term.setBackgroundColor(termBackgroundColor)
 end
-
+---------------------------------------------------
 return this
