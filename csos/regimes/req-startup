@@ -1,31 +1,18 @@
 local this={}
-
 ---------------------------------------------------
-local SETTING_AUTH_Login = "admin"
-local SETTING_AUTH_Password = ""
----------------------------------------------------
-
 local version = "CS-OS v.2.0"
-local termW = 0
-local termH = 0
-local pbar = nil
-
-local libframe = nil
-
-local tickSleepDuration = 0.1
-
+---------------------------------------------------
+local tickSleepDuration = 0.01
 ---------------------------------------------------
 local termTextColor = term.getTextColor()
 local termBackgroundColor = term.getBackgroundColor()
 local termW, termH = term.getSize()
+local authLogin = "admin"
+local authPassword = ""
 ---------------------------------------------------
-function this.GetVersion()
-  return version
-end
+function this.GetVersion() return version end
 ---------------------------------------------------
-function this.Sleep()
-  sleep(tickSleepDuration)
-end
+function this.Sleep() sleep(tickSleepDuration) end
 ---------------------------------------------------
 function this.DisplayMessage(message)
   term.setCursorPos(1, termH)
@@ -47,11 +34,6 @@ function this.ProgressTick()
 end
 ---------------------------------------------------
 function this.Start(extrasteps)
-  if extrasteps == nil then extrasteps = 0 end
-  if SETTING_AUTH_Password ~= "" then
-    extrasteps = extrasteps + 2
-  end
-
   term.clear()
   term.setCursorPos(1,1)
 
@@ -74,6 +56,19 @@ function this.Start(extrasteps)
   print(" DONE")
   this.Sleep()
 
+  write("> Loading user parameters ...")
+  this.Sleep()
+  cfgauth = require("/csos/cfg/auth")
+  authLogin = cfgauth.GetLogin()
+  authPassword = cfgauth.GetPassword()
+  print(" DONE")
+  this.Sleep()
+
+  extrasteps = extrasteps or 0
+  if authPassword ~= "" then
+    extrasteps = extrasteps + 2
+  end
+
   term.reset()
   term.setCursorPos((termW - #version) / 2 + 1, termH / 2)
   term.setTextColor(colors.green)
@@ -87,7 +82,7 @@ function this.Start(extrasteps)
   this.DisplayMessage("Initiating progress bar ... DONE")
   this.Sleep()
 
-  if SETTING_AUTH_Password ~= "" then
+  if authPassword ~= "" then
     this.DisplayMessage("Loading library class-frame ...")
     this.ProgressTick()
     this.Sleep()
@@ -106,7 +101,7 @@ function this.Finish()
 end
 ---------------------------------------------------
 function this.Auth()
-  if SETTING_AUTH_Password == "" then return end
+  if authPassword == "" then return end
 
   while true do
     term.reset()
@@ -116,7 +111,7 @@ function this.Auth()
     write(version)
     term.setTextColor(termTextColor)
 
-    local frameW = 14 + math.max(SETTING_AUTH_Login:len(), SETTING_AUTH_Password:len())
+    local frameW = 14 + math.max(authLogin:len(), authPassword:len())
     local frameH = 7
     local frameX = (termW - frameW) / 2 + 1
     local frameY = 4
@@ -129,12 +124,12 @@ function this.Auth()
     write("Ctrl+T still works")
 
     term.setCursorPos(frameX + 2, frameY + 2)
-    write("Login   : " .. SETTING_AUTH_Login)
+    write("Login   : " .. authLogin)
     term.setCursorPos(frameX + 2, frameY + 4)
     write("Password: ")
     inputPassword = read("*")
 
-    if inputPassword == SETTING_AUTH_Password then
+    if inputPassword == authPassword then
       term.setCursorPos(termW / 2 - 7 + 1, 13)
       term.setTextColor(colors.green)
       print("Access granted")
@@ -148,7 +143,7 @@ function this.Auth()
       term.setCursorPos(termW / 2 - 5 + 1, 14)
       print("Try again")
       term.setTextColor(termTextColor)
-      sleep(3)
+      sleep(2)
     end
   end
 

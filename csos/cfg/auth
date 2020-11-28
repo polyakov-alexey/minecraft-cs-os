@@ -1,0 +1,20 @@
+---------------------------------------------------
+-- USER SETTINGS
+---------------------------------------------------
+
+-- Set PASSWORD to "" to disable authentication
+
+local LOGIN    = "admin"
+local PASSWORD = ""
+
+
+
+
+
+---------------------------------------------------
+-- DO NOT CHANGE CODE BELOW THIS LINE
+---------------------------------------------------
+local this={}
+function this.GetLogin() return LOGIN end
+function this.GetPassword() return PASSWORD end
+return this
