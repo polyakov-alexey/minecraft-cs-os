@@ -1,0 +1,124 @@
+local this={}
+this.__index = this
+
+-- types: "checkbox", "slider", "framed"
+---------------------------------------------------
+function this.new(x, y, type, label, actionON, actionOFF)
+  if type ~= "checkbox" and type ~= "slider" and type ~= "framed" then return end
+  local self={}
+  setmetatable(self, this)
+  self.x = x
+  self.y = y
+  self.type = type
+  self.label = label
+  self.state = false
+  self.actionON = actionON
+  self.actionOFF = actionOFF
+  if type == "framed" then
+    local libframe = require("/csos/lib/class-frame")
+    self.frame = libframe.new(x,y,15,5,label)
+  end
+  return self
+end
+---------------------------------------------------
+function this:SetActions(actionON, actionOFF)
+  self.actionON = actionON
+  self.actionOFF = actionOFF
+end
+---------------------------------------------------
+function this:GetActionON() return self.actionON end
+---------------------------------------------------
+function this:GetActionOFF() return self.actionOFF end
+---------------------------------------------------
+function this:SetState(state)
+  self.state = state
+  self:Redraw()
+end
+---------------------------------------------------
+function this:TurnON()
+  if self:GetActionON() then self:actionON() end
+end
+---------------------------------------------------
+function this:TurnOFF()
+  if self:GetActionOFF() then self:actionOFF() end
+end
+---------------------------------------------------
+function this:Toggle()
+  if self.state then
+    self:TurnOFF()
+  else
+    self:TurnON()
+  end
+end
+---------------------------------------------------
+function this:Redraw()
+  if self.type ~= "checkbox" and self.type ~= "slider" and self.type ~= "framed" then return end
+  -----
+  if self.type == "checkbox" then
+    term.setCursorPos(self.x,self.y)
+    termBackgroundColor = term.getBackgroundColor()
+    if self.state then term.setBackgroundColor(colors.lime) else term.setBackgroundColor(colors.lightGray) end
+    term.write(" ")
+    term.setBackgroundColor(termBackgroundColor)
+    write(" " .. self.label)
+    return
+  end
+  -----
+  if self.type == "slider" then
+    term.setCursorPos(self.x,self.y)
+    termBackgroundColor = term.getBackgroundColor()
+    if self.state then
+      term.setBackgroundColor(colors.green)
+      write("  ")
+      term.setBackgroundColor(colors.lime)
+      write(" ")
+    else
+      term.setBackgroundColor(colors.lightGray)
+      write(" ")
+      term.setBackgroundColor(colors.gray)
+      write("  ")
+    end
+    term.setBackgroundColor(termBackgroundColor)
+    write(" " .. self.label)
+    return
+  end
+  -----
+  if self.type == "framed" then
+    local frame = self.frame
+    frame:Draw()
+    term.setCursorPos(self.x + 2, self.y + 2)
+    termBackgroundColor = term.getBackgroundColor()
+    if self.state then
+      term.setBackgroundColor(colors.green)
+      write("        ")
+      term.setBackgroundColor(colors.lime)
+      write("   ")
+    else
+      term.setBackgroundColor(colors.lightGray)
+      write("   ")
+      term.setBackgroundColor(colors.gray)
+      write("        ")
+    end
+    term.setBackgroundColor(termBackgroundColor)
+    return
+  end
+end
+---------------------------------------------------
+function this:ProcessEvent(event, p1, x, y)
+  if event ~= "monitor_touch" and event ~= "mouse_click" then return end
+  if self.type == "checkbox" and x == self.x and y == self.y then
+    self:Toggle()
+  end
+  if self.type == "slider" and y == self.y then
+    if x == self.x then self:TurnOFF()
+    elseif x == (self.x + 1) then self:Toggle()
+    elseif x == (self.x + 2) then self:TurnON() end
+  end
+  if self.type == "framed" and y == (self.y + 2) then
+    if x >= (self.x + 2) and x <= (self.x + 4) then self:TurnOFF()
+    elseif x >= (self.x + 5) and x <= (self.x + 9) then self:Toggle()
+    elseif x >= (self.x + 10) and x <= (self.x + 12) then self:TurnON() end
+  end
+end
+---------------------------------------------------
+return this

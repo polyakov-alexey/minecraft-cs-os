@@ -20,12 +20,8 @@ function this.Init()
   termBackgroundColor = term.getBackgroundColor()
   termW, termH = term.getSize()
 
-  --libbuttons.CreateButton(4,7,3,1,)
-  --libbuttons.CreateButton(8,7,3,1,)
-  --libbuttons.CreateButton(12,7,3,1,)
 
   --this.DrawTopBar()
-  --this.DrawLightControl()
 end
 ---------------------------------------------------
 function this.Tick()
@@ -59,39 +55,6 @@ function this.DrawTopBar()
   write(alarmString)
   term.setTextColor(colors.black)
   write(string.format(" %5s", advtime.Get()))
-  term.setTextColor(termTextColor)
-  term.setBackgroundColor(termBackgroundColor)
-end
----------------------------------------------------
-function this.DrawLightControl()
-  local x = 2
-  local y = 3
-  local frame123 = libframe.new(x,y,15,7,"Lights")
-  frame123:Draw()
-  term.setCursorPos(x + 2, y + 2)
-  if liblight.GetState() then
-    term.setBackgroundColor(colors.yellow)
-  else
-    term.setBackgroundColor(colors.gray)
-  end
-  write("           ")
-  local colorOFF = colors.gray
-  local colorAUTO = colors.gray
-  local colorON = colors.gray
-  local regime = liblight.GetRegime()
-  if regime == "OFF" then colorOFF = colors.red end
-  if regime == "AUTO" then colorAUTO = colors.orange end
-  if regime == "ON" then colorON = colors.green end
-  term.setTextColor(colors.white)
-  term.setCursorPos(x + 2, y + 4)
-  term.setBackgroundColor(colorOFF)
-  write(" x ")
-  term.setCursorPos(x + 6, y + 4)
-  term.setBackgroundColor(colorAUTO)
-  write(" a ")
-  term.setCursorPos(x + 10, y + 4)
-  term.setBackgroundColor(colorON)
-  write(" + ")
   term.setTextColor(termTextColor)
   term.setBackgroundColor(termBackgroundColor)
 end

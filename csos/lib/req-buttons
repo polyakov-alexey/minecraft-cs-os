@@ -15,7 +15,8 @@ function this.CreateButton(x,y,w,h,action)
   buttons[#buttons + 1] = libbutton.new(x,y,w,h,action)
 end
 ---------------------------------------------------
-function this.ProcessTouch(x,y)
+function this.ProcessEvent(event, p1, x, y)
+  if event ~= "monitor_touch" and event ~= "mouse_click" then return end
   for _,btn in ipairs(buttons) do
     if IsInside(x, y, btn:GetX(), btn:GetY(), btn:GetW(), btn:GetH()) then
       btn:GetAction()()

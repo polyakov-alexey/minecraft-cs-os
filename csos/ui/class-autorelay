@@ -1,0 +1,89 @@
+local this={}
+this.__index = this
+-- types: "slider", "checkbox"
+---------------------------------------------------
+local libframe = require("/csos/lib/class-frame")
+---------------------------------------------------
+function this.new(x, y, type, label, actionON, actionAUTO, actionOFF)
+  if type ~= "slider" and type ~= "checkbox" then return end
+  local self={}
+  setmetatable(self, this)
+  self.x = x
+  self.y = y
+  self.type = type
+  self.label = label
+  self.state = "OFF"
+  self.actionON = actionON
+  self.actionAUTO = actionAUTO
+  self.actionOFF = actionOFF
+  self.frame = libframe.new(x, y, 15, 7, label)
+  return self
+end
+---------------------------------------------------
+function this:SetActions(actionON, actionAUTO, actionOFF)
+  self.actionON = actionON
+  self.actionAUTO = actionAUTO
+  self.actionOFF = actionOFF
+end
+---------------------------------------------------
+function this:GetActionON() return self.actionON end
+---------------------------------------------------
+function this:GetActionAUTO() return self.actionAUTO end
+---------------------------------------------------
+function this:GetActionOFF() return self.actionOFF end
+---------------------------------------------------
+function this:SetState(state)
+  self.state = state
+  self:Redraw()
+end
+---------------------------------------------------
+function this:TurnON()
+  if self:GetActionON() then self:actionON() end
+end
+---------------------------------------------------
+function this:TurnAUTO()
+  if self:GetActionAUTO() then self:actionAUTO() end
+end
+---------------------------------------------------
+function this:TurnOFF()
+  if self:GetActionOFF() then self:actionOFF() end
+end
+---------------------------------------------------
+function this:Redraw()
+  self.frame:Draw()
+  term.setCursorPos(self.x + 2, self.y + 2)
+  if self.state == "ON" then
+    term.setBackgroundColor(colors.green)
+  else
+    term.setBackgroundColor(colors.gray)
+  end
+  write("           ")
+  local colorOFF = colors.gray
+  local colorAUTO = colors.gray
+  local colorON = colors.gray
+  if self.state == "OFF" then colorOFF = colors.red end
+  if self.state == "AUTO" then colorAUTO = colors.orange end
+  if self.state == "ON" then colorON = colors.green end
+  term.setTextColor(colors.white)
+  term.setCursorPos(self.x + 2, self.y + 4)
+  term.setBackgroundColor(colorOFF)
+  write(" x ")
+  term.setCursorPos(self.x + 6, self.y + 4)
+  term.setBackgroundColor(colorAUTO)
+  write(" a ")
+  term.setCursorPos(self.x + 10, self.y + 4)
+  term.setBackgroundColor(colorON)
+  write(" + ")
+  term.setTextColor(termTextColor)
+  term.setBackgroundColor(termBackgroundColor)
+end
+---------------------------------------------------
+function this:ProcessEvent(event, p1, x, y)
+  if event ~= "monitor_touch" and event ~= "mouse_click" then return end
+  if y ~= (self.y + 4) then return end
+  if x >= (self.x + 2) and x <= (self.x + 4) then self:TurnOFF()
+  elseif x >= (self.x + 6) and x <= (self.x + 8) then self:TurnAUTO()
+  elseif x >= (self.x + 10) and x <= (self.x + 12) then self:TurnON() end
+end
+---------------------------------------------------
+return this
