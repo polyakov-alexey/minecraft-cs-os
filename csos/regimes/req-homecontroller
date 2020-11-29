@@ -2,75 +2,33 @@ local this={}
 ---------------------------------------------------
 local advterm = require("/csos/lib/req-advterm")
 local libframe = require("/csos/lib/class-frame")
-local advtime = require("/csos/lib/req-advtime")
-local libspeaker = require("/csos/lib/req-speaker")
-local libnightalarm = require("/csos/lib/req-nightalarm")
-local libbuttons = require("/csos/lib/req-buttons")
+local topbar = require("/csos/regimes/req-topbar")
+local libtick = require("/csos/lib/req-tick")
 ---------------------------------------------------
 local termTextColor = term.getTextColor()
 local termBackgroundColor = term.getBackgroundColor()
 local termW, termH = term.getSize()
 ---------------------------------------------------
-local incomingMsgs = 1
+function this.Tick()
+  topbar.Tick()
+end
 ---------------------------------------------------
-function this.Init()
+function this.Start()
   advterm.Enable()
   term.reset()
+
   termTextColor = term.getTextColor()
   termBackgroundColor = term.getBackgroundColor()
   termW, termH = term.getSize()
 
+  libtick.AddSubscriber(this.Tick)
+  libtick.SetPeriod(0.25)
 
-  --this.DrawTopBar()
-end
----------------------------------------------------
-function this.Tick()
-  this.DrawTopBar()
+  topbar.Draw()
 
-  libnightalarm.Tick()
-end
----------------------------------------------------
-function this.DrawTopBar()
-  term.setCursorPos(1,1)
-  term.setBackgroundColor(colors.green)
-
-  local msgsString = ""
-  if incomingMsgs ~= 0 then
-    msgsString = "[Msgs:" .. incomingMsgs .. "]"
-  end
-
-  local alarmLevel = libnightalarm.GetAlarmLevel()
-  local alarmSymbol = "#"
-  local alarmString = ""
-  while alarmString:len() < alarmLevel and alarmString:len() < 3 do
-    alarmString = alarmString .. alarmSymbol
-  end
-
-  term.setTextColor(colors.black)
-  write(msgsString)
-  -- 5 - time length
-  -- 1 - space between alarm and time
-  term.write(string.format("%" .. (termW - msgsString:len() - alarmString:len() - 5 - 1) .. "s", ""))
-  term.setTextColor(colors.red)
-  write(alarmString)
-  term.setTextColor(colors.black)
-  write(string.format(" %5s", advtime.Get()))
-  term.setTextColor(termTextColor)
-  term.setBackgroundColor(termBackgroundColor)
-end
----------------------------------------------------
-function this.Start()
-  this.Init()
-  local timer = os.startTimer(0.25)
   while true do
     event, p1, p2, p3 = os.pullEvent()
-    if event == "timer" then
-      this.Tick()
-      timer = os.startTimer(0.25)
-    end
-    if event == "monitor_touch" then
-      libbuttons.ProcessTouch(p2,p3)
-    end
+    libtick.ProcessEvent(event, p1, p2, p3)
   end
 end
 ---------------------------------------------------

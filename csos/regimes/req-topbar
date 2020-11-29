@@ -1,0 +1,46 @@
+local this={}
+---------------------------------------------------
+local advtime = require("/csos/lib/req-advtime")
+local libnightalarm = require("/csos/lib/req-nightalarm")
+---------------------------------------------------
+local incomingMsgs = 1
+---------------------------------------------------
+function this.Tick()
+  this.Draw()
+  libnightalarm.Tick()
+end
+---------------------------------------------------
+function this.Draw()
+  local termTextColor = term.getTextColor()
+  local termBackgroundColor = term.getBackgroundColor()
+  local termW, termH = term.getSize()
+
+  term.setCursorPos(1,1)
+  term.setBackgroundColor(colors.green)
+
+  local msgsString = ""
+  if incomingMsgs ~= 0 then
+    msgsString = "[Msgs:" .. incomingMsgs .. "]"
+  end
+
+  local alarmLevel = libnightalarm.GetAlarmLevel()
+  local alarmSymbol = "#"
+  local alarmString = ""
+  while alarmString:len() < alarmLevel and alarmString:len() < 3 do
+    alarmString = alarmString .. alarmSymbol
+  end
+
+  term.setTextColor(colors.black)
+  write(msgsString)
+  -- 5 - time length
+  -- 1 - space between alarm and time
+  term.write(string.format("%" .. (termW - msgsString:len() - alarmString:len() - 5 - 1) .. "s", ""))
+  term.setTextColor(colors.red)
+  write(alarmString)
+  term.setTextColor(colors.black)
+  write(string.format(" %5s", advtime.Get()))
+  term.setTextColor(termTextColor)
+  term.setBackgroundColor(termBackgroundColor)
+end
+---------------------------------------------------
+return this
