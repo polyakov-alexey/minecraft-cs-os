@@ -1,18 +1,2 @@
----------------------------------------------------
--- USER SETTINGS
----------------------------------------------------
-
-WARNING_TIME_1 = 17
-WARNING_TIME_2 = 18
-
-
-
-
-
----------------------------------------------------
--- DO NOT CHANGE CODE BELOW THIS LINE
----------------------------------------------------
-local this={}
-function this.GetWarningTime1() return WARNING_TIME_1 end
-function this.GetWarningTime2() return WARNING_TIME_2 end
-return this
+CFG_NIGHTALARM_WARNING_TIME_1 = 17
+CFG_NIGHTALARM_WARNING_TIME_2 = 18

@@ -12,5 +12,5 @@ libtick.AddSubscriber(Tick)
 
 while true do
   event, p1, p2, p3 = os.pullEvent()
-  libtick.ProcessEvent(event, p1)
+  libtick.ProcessEvent(event, p1, p2, p3)
 end

@@ -13,13 +13,13 @@ function this.Tick()
     alarmLevel = 3
     return
   end
-  if time < cfg.GetWarningTime1() then
+  if time < CFG_NIGHTALARM_WARNING_TIME_1 then
     alarmLevel = 0
     return
   end
   local newAlarmLevel = 0
   if time > 19 then newAlarmLevel = 3
-  elseif time > cfg.GetWarningTime2() then newAlarmLevel = 2
+  elseif time > CFG_NIGHTALARM_WARNING_TIME_2 then newAlarmLevel = 2
   else newAlarmLevel = 1 end
   if newAlarmLevel == alarmLevel then return false end
   libspeaker.Alarm(newAlarmLevel)

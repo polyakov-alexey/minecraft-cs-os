@@ -1,0 +1,46 @@
+local this={}
+---------------------------------------------------
+local cfg = require("/csos/cfg/mail")
+local msgsTable = {}
+---------------------------------------------------
+function this.GetIncomingAmount() return #msgsTable end
+---------------------------------------------------
+function this.GetFirstMail()
+  local firstMail = msgsTable[1]
+  table.remove(msgsTable, 1)
+  return firstMail
+end
+---------------------------------------------------
+function this.Split(string)
+  local i = string:find(";")
+  if not i then
+    return "ERROR: Mail data file is corrupted!"
+  end
+  local senderIDString = string:sub(0,i-1)
+  local senderName = nil
+  term.setCursorPos(1,15)
+  for _,line in ipairs(CFG_MAIL_NAMETABLE) do
+    local id = line[1]
+    local name = line[2]
+    if id == senderIDString then
+      senderName = name
+      break
+    end
+  end
+  if not senderName then senderName = "#" .. senderIDString end
+  local mailData = string:sub(i+1)
+  return senderName, mailData
+end
+---------------------------------------------------
+function this.Tick()
+end
+---------------------------------------------------
+function this.ProcessEvent(event, id, data, p3)
+  if event ~= "rednet_message" then return end
+  term.setCursorPos(1,15)
+  if data["header"] == "csos-mail" then
+    msgsTable[#msgsTable + 1] = id .. ";" .. data["msg"]
+  end
+end
+---------------------------------------------------
+return this

@@ -2,10 +2,14 @@ local this={}
 ---------------------------------------------------
 local advtime = require("/csos/lib/req-advtime")
 local libnightalarm = require("/csos/lib/req-nightalarm")
+local libmailclient = require("/csos/lib/req-mailclient")
 ---------------------------------------------------
-local incomingMsgs = 1
+local mailButtonLength = 0
+local mail = nil
+local mailOpened = false
 ---------------------------------------------------
 function this.Tick()
+  libmailclient.Tick()
   this.Draw()
   libnightalarm.Tick()
 end
@@ -19,9 +23,11 @@ function this.Draw()
   term.setBackgroundColor(colors.green)
 
   local msgsString = ""
+  local incomingMsgs = libmailclient.GetIncomingAmount()
   if incomingMsgs ~= 0 then
     msgsString = "[Msgs:" .. incomingMsgs .. "]"
   end
+  mailButtonLength = #msgsString
 
   local alarmLevel = libnightalarm.GetAlarmLevel()
   local alarmSymbol = "#"
@@ -49,6 +55,46 @@ function this.Draw()
   write(string.format("%5s", advtime.Get()))
   term.setTextColor(termTextColor)
   term.setBackgroundColor(termBackgroundColor)
+
+  if mailOpened then this.DrawMail() end
+end
+---------------------------------------------------
+function this.ProcessEvent(event, p1, p2, p3)
+  libmailclient.ProcessEvent(event, p1, p2, p3)
+  return this.ProcessClick(event, p1, p2, p3)
+end
+---------------------------------------------------
+function this.DrawMail()
+  local termTextColor = term.getTextColor()
+  local termBackgroundColor = term.getBackgroundColor()
+  local termW, termH = term.getSize()
+  local sender, text = libmailclient.Split(mail)
+  term.setBackgroundColor(colors.lightGray)
+  term.setTextColor(colors.black)
+  term.setCursorPos(1,2)
+  print(string.format("%-" .. termW .. "s", ""))
+  print(string.format("%-" .. termW .. "s", " Mail from " .. sender .. ":"))
+  print(string.format("%-" .. termW .. "s", ""))
+  print(string.format("%-" .. termW .. "s", " " .. text))
+  write(string.format("%-" .. termW .. "s", ""))
+  term.setBackgroundColor(termBackgroundColor)
+  term.setTextColor(termTextColor)
+end
+---------------------------------------------------
+function this.ProcessClick(event, p1, x, y)
+  if event ~= "monitor_touch" and event ~= "mouse_click" then return end
+  if mailOpened and y >= 2 and y <= 6 then
+    mailOpened = false
+    return true
+  end
+  if y == 1 and x <= mailButtonLength then
+    this.UpdateMail()
+    mailOpened = true
+  end
+end
+---------------------------------------------------
+function this.UpdateMail()
+  mail = libmailclient.GetFirstMail()
 end
 ---------------------------------------------------
 return this

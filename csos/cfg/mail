@@ -1,0 +1,4 @@
+CFG_MAIL_NAMETABLE = {
+  {"7", "Misha"},
+  {"8", "Sanya"}
+}

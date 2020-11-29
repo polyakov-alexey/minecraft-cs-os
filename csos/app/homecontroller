@@ -1,2 +1,30 @@
-local libhome = require("/csos/regimes/req-homecontroller")
-libhome.Start()
+local advterm = require("/csos/lib/req-advterm")
+local libframe = require("/csos/lib/class-frame")
+local topbar = require("/csos/regimes/req-topbar")
+local libtick = require("/csos/lib/req-tick")
+---------------------------------------------------
+local termTextColor = term.getTextColor()
+local termBackgroundColor = term.getBackgroundColor()
+local termW, termH = term.getSize()
+---------------------------------------------------
+function Tick()
+  topbar.Tick()
+end
+---------------------------------------------------
+advterm.Enable()
+term.reset()
+
+termTextColor = term.getTextColor()
+termBackgroundColor = term.getBackgroundColor()
+termW, termH = term.getSize()
+
+libtick.AddSubscriber(Tick)
+libtick.SetPeriod(0.25)
+
+topbar.Draw()
+
+while true do
+  event, p1, p2, p3 = os.pullEvent()
+  libtick.ProcessEvent(event, p1, p2, p3)
+  if topbar.ProcessEvent(event, p1, p2, p3) then term.reset() topbar.Draw() end
+end
