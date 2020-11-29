@@ -4,15 +4,14 @@ this.__index = this
 ---------------------------------------------------
 local libframe = require("/csos/lib/class-frame")
 ---------------------------------------------------
-function this.new(x, y, type, label, actionON, actionAUTO, actionOFF)
-  if type ~= "slider" and type ~= "checkbox" then return end
+function this.new(x, y, label, actionON, actionAUTO, actionOFF)
   local self={}
   setmetatable(self, this)
   self.x = x
   self.y = y
-  self.type = type
   self.label = label
-  self.state = "OFF"
+  self.state = false
+  self.regime = "AUTO"
   self.actionON = actionON
   self.actionAUTO = actionAUTO
   self.actionOFF = actionOFF
@@ -34,7 +33,12 @@ function this:GetActionOFF() return self.actionOFF end
 ---------------------------------------------------
 function this:SetState(state)
   self.state = state
-  self:Redraw()
+  self:Draw()
+end
+---------------------------------------------------
+function this:SetRegime(regime)
+  self.regime = regime
+  self:Draw()
 end
 ---------------------------------------------------
 function this:TurnON()
@@ -49,10 +53,10 @@ function this:TurnOFF()
   if self:GetActionOFF() then self:actionOFF() end
 end
 ---------------------------------------------------
-function this:Redraw()
+function this:Draw()
   self.frame:Draw()
   term.setCursorPos(self.x + 2, self.y + 2)
-  if self.state == "ON" then
+  if self.state == true then
     term.setBackgroundColor(colors.green)
   else
     term.setBackgroundColor(colors.gray)
@@ -61,9 +65,9 @@ function this:Redraw()
   local colorOFF = colors.gray
   local colorAUTO = colors.gray
   local colorON = colors.gray
-  if self.state == "OFF" then colorOFF = colors.red end
-  if self.state == "AUTO" then colorAUTO = colors.orange end
-  if self.state == "ON" then colorON = colors.green end
+  if self.regime == "OFF" then colorOFF = colors.red end
+  if self.regime == "AUTO" then colorAUTO = colors.orange end
+  if self.regime == "ON" then colorON = colors.green end
   term.setTextColor(colors.white)
   term.setCursorPos(self.x + 2, self.y + 4)
   term.setBackgroundColor(colorOFF)

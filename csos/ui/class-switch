@@ -32,7 +32,7 @@ function this:GetActionOFF() return self.actionOFF end
 ---------------------------------------------------
 function this:SetState(state)
   self.state = state
-  self:Redraw()
+  self:Draw()
 end
 ---------------------------------------------------
 function this:TurnON()
@@ -51,7 +51,7 @@ function this:Toggle()
   end
 end
 ---------------------------------------------------
-function this:Redraw()
+function this:Draw()
   if self.type ~= "checkbox" and self.type ~= "slider" and self.type ~= "framed" then return end
   -----
   if self.type == "checkbox" then

@@ -1,0 +1,60 @@
+local classswitch = require("/csos/ui/class-switch")
+local classautorelay = require("/csos/ui/class-autorelay")
+local libframe = require("/csos/lib/class-frame")
+local advterm = require("/csos/lib/req-advterm")
+
+-- Auto-detecting monitor
+advterm.Enable()
+term.setTextScale(0.5)
+term.clear()
+
+-- Checkbox
+local checkbox = classswitch.new(36,8,"checkbox","Checkbox")
+checkbox:Draw()
+function CheckboxON() checkbox:SetState(true) end
+function CheckboxOFF() checkbox:SetState(false) end
+checkbox:SetActions(CheckboxON, CheckboxOFF)
+
+-- Sliders in frame
+local slider1 = classswitch.new(4,4,"slider","Slider1")
+slider1:Draw()
+function Slider1ON() slider1:SetState(true) end
+function Slider1OFF() slider1:SetState(false) end
+slider1:SetActions(Slider1ON, Slider1OFF)
+local slider2 = classswitch.new(4,6,"slider","Slider2")
+slider2:Draw()
+function Slider2ON() slider2:SetState(true) end
+function Slider2OFF() slider2:SetState(false) end
+slider2:SetActions(Slider2ON, Slider2OFF)
+local frame = libframe.new(2,2,15,7,"Sliders")
+frame:Draw()
+
+-- Framed switch
+local framed = classswitch.new(36,2,"framed","Framed")
+framed:Draw()
+function FramedON() framed:SetState(true) end
+function FramedOFF() framed:SetState(false) end
+framed:SetActions(FramedON, FramedOFF)
+
+-- AutoRelay
+local autorelay = classautorelay.new(19,2,"AutoRelay")
+autorelay:Draw()
+function AutorelayON() autorelay:SetRegime("ON") autorelay:SetState(true) end
+function AutorelayAUTO() autorelay:SetRegime("AUTO") end
+function AutorelayOFF() autorelay:SetRegime("OFF") autorelay:SetState(false) end
+autorelay:SetActions(AutorelayON, AutorelayAUTO, AutorelayOFF)
+
+-- Demo states
+Slider1OFF()
+Slider2ON()
+FramedON()
+CheckboxON()
+
+while true do
+  event, p1, p2, p3 = os.pullEvent()
+  checkbox:ProcessEvent(event, p1, p2, p3)
+  slider1:ProcessEvent(event, p1, p2, p3)
+  slider2:ProcessEvent(event, p1, p2, p3)
+  framed:ProcessEvent(event, p1, p2, p3)
+  autorelay:ProcessEvent(event, p1, p2, p3)
+end
