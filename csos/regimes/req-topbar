@@ -30,15 +30,23 @@ function this.Draw()
     alarmString = alarmString .. alarmSymbol
   end
 
+  local dayString = "Day " .. os.day()
+
   term.setTextColor(colors.black)
   write(msgsString)
-  -- 5 - time length
-  -- 1 - space between alarm and time
-  term.write(string.format("%" .. (termW - msgsString:len() - alarmString:len() - 5 - 1) .. "s", ""))
+  -- 7 - magic length of timeString and date-time block decoration
+  term.write(string.format("%" .. (termW - msgsString:len() - alarmString:len() - dayString:len() - 7) .. "s", ""))
   term.setTextColor(colors.red)
   write(alarmString)
+  local spacer = "|"
+  term.setTextColor(colors.gray)
+  write(spacer)
   term.setTextColor(colors.black)
-  write(string.format(" %5s", advtime.Get()))
+  write(dayString)
+  term.setTextColor(colors.gray)
+  write(spacer)
+  term.setTextColor(colors.black)
+  write(string.format("%5s", advtime.Get()))
   term.setTextColor(termTextColor)
   term.setBackgroundColor(termBackgroundColor)
 end
