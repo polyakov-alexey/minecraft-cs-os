@@ -1,0 +1,39 @@
+local advterm = require("/csos/lib/req-advterm")
+local advtime = require("/csos/lib/req-advtime")
+local libnightalarm = require("/csos/lib/req-nightalarm")
+local libtick = require("/csos/lib/req-tick")
+---------------------------------------------------
+function Tick()
+  Draw()
+  libnightalarm.Tick()
+end
+---------------------------------------------------
+function Draw()
+  term.clear()
+  term.setCursorPos(2,2)
+  write(advtime.Get())
+  -----
+  local alarmLevel = libnightalarm.GetAlarmLevel()
+  local alarmString = ""
+  if alarmLevel == 3 then alarmString = "###"
+  elseif alarmLevel == 2 then alarmString = "# #"
+  elseif alarmLevel == 1 then alarmString = " # "
+  end
+  term.setCursorPos(3,4)
+  write(alarmString)
+end
+---------------------------------------------------
+advterm.Enable()
+term.clear()
+---------------------------------------------------
+termTextColor = term.getTextColor()
+termBackgroundColor = term.getBackgroundColor()
+termW, termH = term.getSize()
+---------------------------------------------------
+libtick.AddSubscriber(Tick)
+libtick.SetPeriod(0.25)
+---------------------------------------------------
+while true do
+  event, p1, p2, p3 = os.pullEvent()
+  libtick.ProcessEvent(event, p1, p2, p3)
+end
