@@ -10,7 +10,7 @@ local applications = {
 }
 
 local doneStepsCount = 0
-local totalStepsCount = #applications + 4
+local totalStepsCount = #applications + 2
 local function DrawProgressBar()
   local cursorX, cursorY = term.getCursorPos()
   term.setCursorPos(1,1)
