@@ -1,0 +1,73 @@
+CFG_MODEM_SIDE = "back"
+CFG_REDSTONE_SIDE = "right"
+
+rednet.open(CFG_MODEM_SIDE)
+
+local ownX, ownY, ownZ = gps.locate()
+----------------------------
+-- DO POS CORRECTION HERE --
+----------------------------
+
+----------------------------
+if ownX == nil then
+  print("!!! Can't locate GPS")
+  return nil
+end
+print("GPS: " .. ownX .. " " .. ownY .. " " .. ownZ)
+local ownPos = vector.new(ownX, ownY, ownZ)
+
+if not rednet.isOpen() then
+  print("!!! RedNet is NOT open")
+  return nil
+end
+
+local function SendAnswer(id)
+  local msg = {}
+  msg["protocol"] = "DRELAY"
+  if redstone.getOutput(CFG_REDSTONE_SIDE) then
+    msg["state"] = "ON"
+  else
+    msg["state"] = "OFF"
+  end
+  rednet.send(id, msg)
+end
+
+local function ProcessRelayEvent(event, id, msg)
+  if (event ~= "rednet_message") then return nil end
+  -- print("<-- #" .. id)
+  if ((type(msg) ~= "table") or (msg["protocol"] ~= "DRELAY")) then
+    return nil
+  end
+  if (msg["state"] == "ON") then
+    redstone.setOutput(CFG_REDSTONE_SIDE, true)
+    -- print("--- Turned ON")
+  elseif (msg["state"] == "OFF") then
+    redstone.setOutput(CFG_REDSTONE_SIDE, false)
+    -- print("--- Turned OFF")
+  else
+    -- print("!!! Unknown state: " .. msg["state"])
+  end
+  SendAnswer(id)
+end
+
+local function ProcessGPSEvent(event, id, msg)
+  if (event ~= "rednet_message") then return nil end
+  -- print("<-- #" .. id)
+  if ((type(msg) ~= "table") or (msg["protocol"] ~= "DOORHANDSFREE")) then
+    return nil
+  end
+  local clientPos = vector.new(msg["x"], msg["y"], msg["z"])
+  local delta = clientPos - ownPos
+  local distance = delta:length()
+  if distance < 6 then
+    redstone.setOutput(CFG_REDSTONE_SIDE, true)
+  else
+    redstone.setOutput(CFG_REDSTONE_SIDE, false)
+  end
+end
+
+while true do
+  event, p1, p2, p3 = os.pullEvent()
+  ProcessRelayEvent(event, p1, p2, p3)
+  ProcessGPSEvent(event, p1, p2, p3)
+end

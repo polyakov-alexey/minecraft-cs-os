@@ -1,0 +1,43 @@
+CFG_MODEM_SIDE = "back"
+CFG_REDSTONE_SIDE = "left"
+
+rednet.open(CFG_MODEM_SIDE)
+
+if not rednet.isOpen() then
+  print("!!! RedNet is NOT open")
+  return nil
+end
+
+local function SendAnswer(id)
+  local msg = {}
+  msg["protocol"] = "DRELAY"
+  if redstone.getOutput(CFG_REDSTONE_SIDE) then
+    msg["state"] = "ON"
+  else
+    msg["state"] = "OFF"
+  end
+  rednet.send(id, msg)
+end
+
+local function ProcessEvent(event, id, msg)
+  if (event ~= "rednet_message") then return nil end
+  -- print("<-- #" .. id)
+  if ((type(msg) ~= "table") or (msg["protocol"] ~= "DRELAY")) then
+    return nil
+  end
+  if (msg["state"] == "ON") then
+    redstone.setOutput(CFG_REDSTONE_SIDE, true)
+    -- print("--- Turned ON")
+  elseif (msg["state"] == "OFF") then
+    redstone.setOutput(CFG_REDSTONE_SIDE, false)
+    -- print("--- Turned OFF")
+  else
+    -- print("!!! Unknown state: " .. msg["state"])
+  end
+  SendAnswer(id)
+end
+
+while true do
+  event, p1, p2, p3 = os.pullEvent()
+  ProcessEvent(event, p1, p2, p3)
+end

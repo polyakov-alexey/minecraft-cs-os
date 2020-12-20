@@ -9,7 +9,7 @@ function this.GetAlarmLevel() return alarmLevel end
 ---------------------------------------------------
 function this.Tick()
   local time = os.time()
-  if time < 7 then
+  if time < 6 then
     alarmLevel = 3
     return
   end

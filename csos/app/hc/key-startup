@@ -1,0 +1,15 @@
+CFG_DOOR_CONTROLLER_ID = 21
+
+rednet.open("back")
+
+while true do
+  local x,y,z = gps.locate()
+  -- print("GPS: " .. x .. " " .. y .. " " .. z)
+  local msg = {}
+  msg["protocol"] = "DOORHANDSFREE"
+  msg["x"] = x
+  msg["y"] = y
+  msg["z"] = z
+  rednet.send(CFG_DOOR_CONTROLLER_ID, msg)
+  sleep(0.25)
+end

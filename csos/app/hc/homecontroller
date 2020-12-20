@@ -1,0 +1,84 @@
+local advterm = require("/csos/lib/req-advterm")
+local libframe = require("/csos/lib/class-frame")
+local topbar = require("/csos/regimes/req-topbar")
+local libtick = require("/csos/lib/req-tick")
+local classautorelay = require("/csos/ui/class-autorelay")
+local cfg = require("/csos/cfg/homecontroller")
+---------------------------------------------------
+local termTextColor = term.getTextColor()
+local termBackgroundColor = term.getBackgroundColor()
+local termW, termH = term.getSize()
+---------------------------------------------------
+local MFSUAutoRegimeEnabled = true
+local MFSUTimeRemaining = 0
+---------------------------------------------------
+local function SetMatterActive(state)
+  local msg = {}
+  msg["protocol"]="DRELAY"
+  if state then
+    msg["state"]="ON"
+  else
+    msg["state"]="OFF"
+  end
+  rednet.send(CFG_MATTER_RELAY_ID, msg)
+end
+---------------------------------------------------
+function Tick()
+  topbar.Tick()
+
+  if not MFSUAutoRegimeEnabled then return nil end
+  if redstone.getInput(CFG_MFSU_STATE_SIDE) then
+    if MFSUTimeRemaining == 0 then SetMatterActive(true) end
+    MFSUTimeRemaining = CFG_MFSU_WORK_TIME
+  else
+    MFSUTimeRemaining = MFSUTimeRemaining - CFG_TICK_PERIOD
+    if MFSUTimeRemaining <= 0 then
+      MFSUTimeRemaining = 0
+      SetMatterActive(false)
+    end
+  end
+end
+---------------------------------------------------
+local matterRelay = classautorelay.new(2,3,"Matter")
+function matterRelayON() matterRelay:SetRegime("ON") MFSUAutoRegimeEnabled = false SetMatterActive(true) end
+function matterRelayAUTO() matterRelay:SetRegime("AUTO") MFSUAutoRegimeEnabled = true end
+function matterRelayOFF() matterRelay:SetRegime("OFF") MFSUAutoRegimeEnabled = false SetMatterActive(false) end
+matterRelay:SetActions(matterRelayON, matterRelayAUTO, matterRelayOFF)
+---------------------------------------------------
+local function MatterProcessEvent(event, id, msg)
+  if (event ~= "rednet_message") then return nil end
+  if id ~= CFG_MATTER_RELAY_ID then return nil end
+  if ((type(msg) ~= "table") or (msg["protocol"] ~= "DRELAY")) then
+    return nil
+  end
+  if msg["state"] == "ON" then
+    matterRelay:SetState(true)
+  elseif msg["state"] == "OFF" then
+    matterRelay:SetState(false)
+  end
+end
+---------------------------------------------------
+
+advterm.Enable()
+term.setTextScale(0.5)
+term.reset()
+rednet.open(CFG_MODEM_SIDE)
+
+matterRelay:Draw()
+
+termTextColor = term.getTextColor()
+termBackgroundColor = term.getBackgroundColor()
+termW, termH = term.getSize()
+
+libtick.AddSubscriber(Tick)
+libtick.SetPeriod(CFG_TICK_PERIOD)
+
+topbar.Draw()
+
+while true do
+  event, p1, p2, p3 = os.pullEvent()
+  libtick.ProcessEvent(event, p1, p2, p3)
+  matterRelay:ProcessEvent(event, p1, p2, p3)
+  MatterProcessEvent(event, p1, p2, p3)
+  if topbar.ProcessEvent(event, p1, p2, p3) then term.reset() topbar.Draw() end
+end

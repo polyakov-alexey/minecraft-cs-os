@@ -1,0 +1,100 @@
+local advterm = require("/csos/lib/req-advterm")
+local advtime = require("/csos/lib/req-advtime")
+local libnightalarm = require("/csos/lib/req-nightalarm")
+local libtick = require("/csos/lib/req-tick")
+---------------------------------------------------
+advterm.Enable()
+term.clear()
+---------------------------------------------------
+local termTextColor = term.getTextColor()
+local termBackgroundColor = term.getBackgroundColor()
+local termW, termH = term.getSize()
+---------------------------------------------------
+local monitorSize = 0
+if termW == 29 then monitorSize = 3
+elseif termW == 18 then monitorSize = 2
+else monitorSize = 1 end
+---------------------------------------------------
+function Tick()
+  Draw()
+  libnightalarm.Tick()
+end
+---------------------------------------------------
+function Draw()
+  term.clear()
+  -----
+  local dayString = "Day " .. os.day()
+  local timeString = advtime.Get()
+  -----
+  local time = os.time()
+  local daytimeString = ""
+  local daytimeColor = termTextColor
+  if time >= 6 and time < 7 then
+    daytimeString = "Morning"
+    daytimeColor = colors.yellow
+  elseif time >= 7 and time < 18.5 then
+    daytimeString = "  Day  "
+    daytimeColor = colors.green
+  elseif time >= 18.5 and time < 19 then
+    daytimeString = "Evening"
+    daytimeColor = colors.yellow
+  else
+    daytimeString = " Night "
+    daytimeColor = colors.red
+  end
+  -----
+  local alarmLevel = libnightalarm.GetAlarmLevel()
+  local alarmString = ""
+  local alarmColor = termTextColor
+  if alarmLevel == 3 then
+    alarmString = "# # #"
+    alarmColor = colors.red
+  elseif alarmLevel == 2 then
+    alarmString = " # # "
+    alarmColor = colors.yellow
+  elseif alarmLevel == 1 then
+    alarmString = "  #  "
+    alarmColor = colors.green
+  end
+  -----
+  if monitorSize == 3 then
+    term.setCursorPos(1 + (9 - dayString:len()) / 2, 2)
+    write(dayString)
+    term.setCursorPos(13,2)
+    write(timeString)
+    term.setCursorPos(22,2)
+    if term.isColor() then term.setTextColor(daytimeColor) end
+    write(daytimeString)
+    term.setCursorPos(13,4)
+    if term.isColor() then  term.setTextColor(alarmColor) end
+    write(alarmString)
+    term.setTextColor(termTextColor)
+  elseif monitorSize == 2 then
+    term.setCursorPos(3,2)
+    write(timeString)
+    term.setCursorPos(10 + (9 - dayString:len()) / 2, 2)
+    write(dayString)
+    term.setCursorPos(2,4)
+    if term.isColor() then term.setTextColor(daytimeColor) end
+    write(daytimeString)
+    term.setCursorPos(12,4)
+    if term.isColor() then  term.setTextColor(alarmColor) end
+    write(alarmString)
+    term.setTextColor(termTextColor)
+  else
+    term.setCursorPos(2,2)
+    write(timeString)
+    term.setCursorPos(2,4)
+    if term.isColor() then  term.setTextColor(alarmColor) end
+    write(alarmString)
+    term.setTextColor(termTextColor)
+  end
+end
+---------------------------------------------------
+libtick.AddSubscriber(Tick)
+libtick.SetPeriod(0.25)
+---------------------------------------------------
+while true do
+  event, p1, p2, p3 = os.pullEvent()
+  libtick.ProcessEvent(event, p1, p2, p3)
+end
